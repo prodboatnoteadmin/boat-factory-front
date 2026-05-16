@@ -193,14 +193,15 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
         <textarea
           ref={descRef}
           value={desc}
-          onChange={(e) => setDesc(e.target.value)}
+          readOnly
           spellCheck={false}
           style={{
             width:'100%', minHeight:160, padding:14,
             background:'var(--bg-1)', border:'1px solid var(--border-strong)', borderRadius:6,
-            color:'var(--text)', fontSize:13, lineHeight:1.55,
+            color:'var(--text-3)', fontSize:13, lineHeight:1.55,
             fontFamily:'JetBrains Mono, monospace',
-            resize:'vertical', outline:'none', overflow:'hidden', display:'block'
+            resize:'vertical', outline:'none', overflow:'hidden', display:'block',
+            cursor:'default'
           }}
         />
       </window.Card>

@@ -11,15 +11,24 @@
 --  that uses the service_role key is unaffected (service_role
 --  bypasses RLS).
 --
---  HOW TO RUN:
---    Supabase Dashboard → SQL Editor → New query → paste → Run.
+--  ⚠️  PRODUCTION WARNING — READ BEFORE RUNNING ⚠️
+--  These same tables are used by ANOTHER production system. Turning on
+--  RLS changes access for EVERY client:
+--    • Clients using the service_role key  -> unaffected (bypass RLS).
+--    • Clients using the anon key WITHOUT a logged-in admin -> BLOCKED.
+--  If the other system reads artists/beats with the anon key, running
+--  this WILL break it. Only run this if you have confirmed the other
+--  system uses the service_role key. The website itself works WITHOUT
+--  running this (login still works); RLS only adds DB-level lockdown.
+--  This script never creates/drops/alters tables or columns.
 --
---  >>> STEP 1: put the admin's email here (the one you log in with):
+--  HOW TO RUN (only when you're sure):
+--    Supabase Dashboard → SQL Editor → New query → paste → Run.
 -- ============================================================
 
 do $$
 declare
-  admin_email text := 'CHANGE_ME@example.com';   -- <-- EDIT THIS
+  admin_email text := 'prodboatnoteadmin@gmail.com';   -- the admin login email
   t text;
 begin
   if admin_email = 'CHANGE_ME@example.com' then
@@ -46,7 +55,7 @@ end $$;
 --  with the anon key. If unsure, leave this commented out.
 -- ------------------------------------------------------------
 -- do $$
--- declare admin_email text := 'CHANGE_ME@example.com';   -- same email
+-- declare admin_email text := 'prodboatnoteadmin@gmail.com';   -- same email
 -- begin
 --   alter table public.pipeline_state enable row level security;
 --   drop policy if exists "admin only" on public.pipeline_state;
@@ -59,9 +68,9 @@ end $$;
 -- end $$;
 
 -- ============================================================
---  STEP 2: create the single admin login user.
---  Easiest + safest: Supabase Dashboard → Authentication → Users
---  → "Add user" → enter the SAME email as above + a password,
---  and tick "Auto Confirm User". That's the only account that
---  will have access (because of the policy above).
+--  ADMIN LOGIN USER: already created (email pre-confirmed) as
+--    prodboatnoteadmin@gmail.com
+--  Change the password anytime in:
+--    Supabase Dashboard → Authentication → Users → (user) → ...
+--  This is the only account the policy above grants access to.
 -- ============================================================

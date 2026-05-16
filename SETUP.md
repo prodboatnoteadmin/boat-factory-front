@@ -6,15 +6,23 @@ React + Vite frontend for the existing Supabase database
 No tables or columns are created or changed. The app reads/writes the
 data already in Supabase.
 
-## 1. Supabase — security (one time)
+## 1. Login user — already done
 
-1. Open `supabase_setup.sql`, set `admin_email` to the email you will
-   log in with.
-2. Supabase Dashboard → SQL Editor → paste it → Run.
-   (Turns on Row Level Security so only that admin email has access.
-   Non-destructive: no data is touched.)
-3. Supabase Dashboard → Authentication → Users → **Add user**:
-   same email + a password, tick **Auto Confirm User**.
+The admin login already exists (email pre-confirmed):
+`prodboatnoteadmin@gmail.com`. Change the password anytime in
+Supabase → Authentication → Users. The app works as soon as the
+keys (step 2) are set.
+
+## 1b. Optional DB lockdown — read the warning
+
+`supabase_setup.sql` turns on Row Level Security so only the admin
+email can touch `artists`/`beats`. It creates/drops/alters **nothing**.
+
+> ⚠️ These tables are shared with another production system. If that
+> system uses the **anon** key, enabling RLS will break it. Only run
+> `supabase_setup.sql` if the other system uses the **service_role**
+> key (service_role bypasses RLS). The website does not require this
+> to function.
 
 ## 2. Get the keys
 

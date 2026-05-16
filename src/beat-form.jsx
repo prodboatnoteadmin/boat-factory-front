@@ -3,23 +3,32 @@ function BeatFormModal({ open, beatId, onClose, onSave }) {
   const I = window.Icons;
   const existing = beatId ? window.DATA.BEATS.find(b => b.id === beatId) : null;
 
-  const [form, setForm] = React.useState({
-    title: existing?.title || '',
-    artist: existing?.artist || '',
-    coArtists: existing?.coArtists || [],
-    year: existing?.year || new Date().getFullYear(),
-    bpm: existing?.bpm || '',
-    key: existing?.key || '',
-    collab: existing?.collab || '',
-    coCollabs: existing?.coCollabs || [],
-    category: existing?.category || '',
-    status: existing?.status || 'draft',
-    beatstars: existing?.beatstars || '',
-    youtube: existing?.youtube || '',
-    fileName: existing?.fileName || '',
-    filePath: existing?.filePath || '',
-    notes: existing?.notes || '',
+  const buildForm = (b) => ({
+    title: b?.title || '',
+    artist: b?.artist || '',
+    coArtists: b?.coArtists ? [...b.coArtists] : [],
+    year: b?.year || new Date().getFullYear(),
+    bpm: b?.bpm ?? '',
+    key: b?.key || '',
+    collab: b?.collab || '',
+    coCollabs: b?.coCollabs ? [...b.coCollabs] : [],
+    category: b?.category || '',
+    status: b?.status || 'draft',
+    beatstars: b?.beatstars || '',
+    youtube: b?.youtube || '',
+    fileName: b?.fileName || '',
+    filePath: b?.filePath || '',
+    notes: b?.notes || '',
   });
+
+  const [form, setForm] = React.useState(() => buildForm(existing));
+
+  // Re-fill the form every time the modal opens (or a different beat
+  // is selected) — otherwise editing shows the previous/empty values.
+  React.useEffect(() => {
+    if (open) setForm(buildForm(existing));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, beatId]);
 
   React.useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };

@@ -35,6 +35,12 @@ function ArtistDetailPage({ artistId, onBack, onNav, onOpenBeat, onEditArtist })
     }
   };
 
+  // Tag groups auto-save to Supabase on every add/remove.
+  const persistTags = (column, next) => {
+    window.DB.updateArtistTags(artist.id, { [column]: next })
+      .catch(e => alert('Kunne ikke gemme tags: ' + e.message));
+  };
+
   return (
     <div>
       {/* Back */}
@@ -82,8 +88,8 @@ function ArtistDetailPage({ artistId, onBack, onNav, onOpenBeat, onEditArtist })
           title="TikTok Artist Hashtags"
           subtitle="Hovedtags når denne artist tagges på TikTok"
           tags={hashtags}
-          onAdd={(t) => setHashtags([...hashtags, '#' + t.replace(/^#+/, '')])}
-          onRemove={(t) => setHashtags(hashtags.filter(x => x !== t))}
+          onAdd={(t) => { const next = [...hashtags, '#' + t.replace(/^#+/, '')]; setHashtags(next); artist.artistHashtags = next; persistTags('tiktok_artist_hashtag', next); }}
+          onRemove={(t) => { const next = hashtags.filter(x => x !== t); setHashtags(next); artist.artistHashtags = next; persistTags('tiktok_artist_hashtag', next); }}
           accent="blue"
           placeholder="hashtag (uden #)"
         />
@@ -91,24 +97,27 @@ function ArtistDetailPage({ artistId, onBack, onNav, onOpenBeat, onEditArtist })
           title="TikTok A-Tags"
           subtitle="Primære søgeord — bruges først"
           tags={aTags}
-          onAdd={(t) => setATags([...aTags, t.replace(/^#+/, '')])}
-          onRemove={(t) => setATags(aTags.filter(x => x !== t))}
+          onAdd={(t) => { const next = [...aTags, t.replace(/^#+/, '')]; setATags(next); artist.aTags = next; persistTags('tiktok_a_tags', next); }}
+          onRemove={(t) => { const next = aTags.filter(x => x !== t); setATags(next); artist.aTags = next; persistTags('tiktok_a_tags', next); }}
+          accent="blue"
           placeholder="a-tag…"
         />
         <InlineTagGroup
           title="TikTok B-Tags"
           subtitle="Sekundære søgeord"
           tags={bTags}
-          onAdd={(t) => setBTags([...bTags, t.replace(/^#+/, '')])}
-          onRemove={(t) => setBTags(bTags.filter(x => x !== t))}
+          onAdd={(t) => { const next = [...bTags, t.replace(/^#+/, '')]; setBTags(next); artist.bTags = next; persistTags('tiktok_b_tags', next); }}
+          onRemove={(t) => { const next = bTags.filter(x => x !== t); setBTags(next); artist.bTags = next; persistTags('tiktok_b_tags', next); }}
+          accent="blue"
           placeholder="b-tag…"
         />
         <InlineTagGroup
           title="TikTok C-Tags"
           subtitle="Mood & teksturer — broader reach"
           tags={cTags}
-          onAdd={(t) => setCTags([...cTags, t.replace(/^#+/, '')])}
-          onRemove={(t) => setCTags(cTags.filter(x => x !== t))}
+          onAdd={(t) => { const next = [...cTags, t.replace(/^#+/, '')]; setCTags(next); artist.cTags = next; persistTags('tiktok_c_tags', next); }}
+          onRemove={(t) => { const next = cTags.filter(x => x !== t); setCTags(next); artist.cTags = next; persistTags('tiktok_c_tags', next); }}
+          accent="blue"
           placeholder="c-tag…"
         />
       </div>

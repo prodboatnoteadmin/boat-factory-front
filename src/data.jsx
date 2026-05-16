@@ -200,6 +200,13 @@ window.DB = {
     throwIf(error, 'Kunne ikke gemme YouTube keywords');
   },
 
+  // fields: any subset of tiktok_artist_hashtag / tiktok_a_tags /
+  //         tiktok_b_tags / tiktok_c_tags  (each a string[])
+  async updateArtistTags(id, fields) {
+    const { error } = await sb().from('artists').update(fields).eq('id', id);
+    throwIf(error, 'Kunne ikke gemme tags');
+  },
+
   // Persist the publish queue: queueIds in order, pendingIds get no position.
   async persistQueue(queueIds, pendingIds) {
     const updates = [];

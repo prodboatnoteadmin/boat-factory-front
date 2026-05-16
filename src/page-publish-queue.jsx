@@ -16,6 +16,8 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
   const [draggingId, setDraggingId] = React.useState(null);
   const [dragOverId, setDragOverId] = React.useState(null);
   const [confirmRemove, setConfirmRemove] = React.useState(null);
+  const [qShown, setQShown] = React.useState(20);
+  const moreRef = React.useRef(null);
 
   // Same column metrics as the Beats list (40/2fr/1.2fr/70/80/70) plus
   // a position col, a drag handle, and two action buttons.
@@ -31,6 +33,19 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
     if (artistFilter && b.artist !== artistFilter) return false;
     return true;
   });
+
+  // Infinite scroll: 20 at a time, load 20 more when the sentinel shows.
+  React.useEffect(() => { setQShown(20); }, [search, artistFilter]);
+  React.useEffect(() => {
+    if (qShown >= visible.length) return;
+    const el = moreRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) setQShown(s => Math.min(s + 20, visible.length));
+    }, { rootMargin: '300px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [qShown, visible.length]);
 
   const handleDragStart = (id) => setDraggingId(id);
   const handleDragOver = (e, id) => { e.preventDefault(); setDragOverId(id); };
@@ -97,7 +112,7 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
             <div style={{padding:'48px', textAlign:'center', color:'var(--text-3)', fontSize:14}}>Ingen beats matcher filtrene.</div>
           )}
 
-          {visible.map((b, vIdx) => {
+          {visible.slice(0, qShown).map((b, vIdx) => {
             const pos = queueIds.indexOf(b.id);
             const ytLink = window.getFirstYouTubeLink(b.id);
             const postedYt = !!ytLink || !!b.youtubeStatus;
@@ -167,6 +182,11 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
               </div>
             );
           })}
+          {qShown < visible.length && (
+            <div ref={moreRef} style={{ padding:'18px', textAlign:'center', color:'var(--text-3)', fontSize:13 }}>
+              Indlæser flere… ({qShown} / {visible.length})
+            </div>
+          )}
         </div>
       </div>
 

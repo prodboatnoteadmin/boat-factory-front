@@ -7,6 +7,8 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
   const [sortDir, setSortDir] = React.useState('desc');
   const [selected, setSelected] = React.useState(new Set());
   const [playBeat, setPlayBeat] = React.useState(null);
+  const [shown, setShown] = React.useState(20);
+  const moreRef = React.useRef(null);
 
   React.useEffect(() => {
     if (!playBeat) return;
@@ -35,6 +37,19 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
     });
     return arr;
   }, [search, artistFilter, sortBy, sortDir]);
+
+  // Infinite scroll: 20 at a time, load 20 more when the sentinel shows.
+  React.useEffect(() => { setShown(20); }, [search, artistFilter, sortBy, sortDir]);
+  React.useEffect(() => {
+    if (shown >= filtered.length) return;
+    const el = moreRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) setShown(s => Math.min(s + 20, filtered.length));
+    }, { rootMargin: '300px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [shown, filtered.length]);
 
   const setSort = (col) => {
     if (sortBy === col) setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
@@ -92,7 +107,7 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
         {filtered.length === 0 && (
           <div style={{padding:'48px', textAlign:'center', color:'var(--text-3)', fontSize:14}}>Ingen beats matcher filtrene.</div>
         )}
-        {filtered.map((b, idx) => {
+        {filtered.slice(0, shown).map((b, idx) => {
           const checked = selected.has(b.id);
           const published = window.getLatestPublishDate(b.id);
           const ytLink = window.getFirstYouTubeLink(b.id);
@@ -142,6 +157,11 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
             </div>
           );
         })}
+        {shown < filtered.length && (
+          <div ref={moreRef} style={{ padding:'18px', textAlign:'center', color:'var(--text-3)', fontSize:13 }}>
+            Indlæser flere… ({shown} / {filtered.length})
+          </div>
+        )}
         </div>
       </div>
 

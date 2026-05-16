@@ -94,22 +94,6 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
         </div>
       </div>
 
-      {/* Udgivelses-historik — moved above the YouTube block */}
-      <div style={{ marginBottom:28 }}>
-        <UdgivelsesListe
-          beat={beat}
-          jobs={jobs}
-          inQueue={inQueue}
-          queuePosition={queuePosition}
-          onNav={onNav}
-          manualYt={manualYt}
-          setManualYt={setManualYt}
-          savedManualYt={savedManualYt}
-          setSavedManualYt={setSavedManualYt}
-          hasDetectedYt={!!detectedYt}
-        />
-      </div>
-
       {/* YouTube — real embed for beats that have a YouTube link */}
       <div style={{ marginBottom:28 }}>
         {(() => {
@@ -178,6 +162,22 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
             </div>
           </div>
         </window.Card>
+      </div>
+
+      {/* Udgivelses-historik — between Info and YouTube beskrivelse */}
+      <div style={{ marginBottom:24 }}>
+        <UdgivelsesListe
+          beat={beat}
+          jobs={jobs}
+          inQueue={inQueue}
+          queuePosition={queuePosition}
+          onNav={onNav}
+          manualYt={manualYt}
+          setManualYt={setManualYt}
+          savedManualYt={savedManualYt}
+          setSavedManualYt={setSavedManualYt}
+          hasDetectedYt={!!detectedYt}
+        />
       </div>
 
       {/* YouTube description (from template) */}

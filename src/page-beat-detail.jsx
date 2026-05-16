@@ -68,21 +68,29 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
         paddingBottom:24, borderBottom:'1px solid var(--border)'
       }}>
         <div style={{minWidth:0, flex:1}}>
-          <h1 style={{margin:'0 0 14px 0', fontSize:42, fontWeight:700, letterSpacing:'-.03em', lineHeight:1.05}}>{beat.title}</h1>
-          <button onClick={() => onOpenArtist(beat.artist)} style={{
-            display:'inline-flex', alignItems:'center', gap:12, padding:0,
-            background:'transparent', textAlign:'left'
-          }}>
-            <window.ArtistAvatar id={beat.artist} name={artist?.name || beat.artist} size={42} />
-            <div>
-              <div style={{fontSize:11, color:'var(--text-3)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:2, fontWeight:600}}>Artist</div>
-              <div style={{fontSize:22, fontWeight:700, color:'var(--text)', letterSpacing:'-.01em'}}
-                onMouseEnter={e => e.currentTarget.style.color='var(--blue)'}
-                onMouseLeave={e => e.currentTarget.style.color='var(--text)'}>
-                {artist?.name || beat.artist}
+          <div style={{display:'flex', alignItems:'center', gap:20, minWidth:0}}>
+            <button onClick={() => onOpenArtist(beat.artist)} style={{
+              display:'inline-flex', alignItems:'center', gap:12, padding:0,
+              background:'transparent', textAlign:'left', flexShrink:0
+            }}>
+              <window.ArtistAvatar id={beat.artist} name={artist?.name || beat.artist} size={48} />
+              <div>
+                <div style={{fontSize:11, color:'var(--text-3)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:2, fontWeight:600}}>Artist</div>
+                <div style={{fontSize:18, fontWeight:700, color:'var(--text)', letterSpacing:'-.01em'}}
+                  onMouseEnter={e => e.currentTarget.style.color='var(--blue)'}
+                  onMouseLeave={e => e.currentTarget.style.color='var(--text)'}>
+                  {artist?.name || beat.artist}
+                </div>
               </div>
-            </div>
-          </button>
+            </button>
+
+            <div style={{width:1, alignSelf:'stretch', background:'var(--border)', flexShrink:0}}></div>
+
+            <h1 style={{
+              margin:0, fontSize:34, fontWeight:700, letterSpacing:'-.03em', lineHeight:1.1,
+              minWidth:0, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'
+            }}>{beat.title}</h1>
+          </div>
           {coArtists.length > 0 && (
             <div style={{marginTop:14, display:'flex', alignItems:'center', gap:8, flexWrap:'wrap'}}>
               <span style={{fontSize:11, color:'var(--text-3)', letterSpacing:'.06em', textTransform:'uppercase', fontWeight:600}}>Co-artists:</span>

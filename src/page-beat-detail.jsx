@@ -42,12 +42,15 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:16, fontSize:13, color:'var(--text-3)' }}>
-        <button onClick={() => onNav('beats')} style={{color:'var(--text-3)'}} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--text-3)'}>Beats</button>
-        <I.chevR width={12} height={12} />
-        <span style={{color:'var(--text-2)'}}>{beat.title}</span>
-      </div>
+      {/* Back */}
+      <button onClick={onBack} style={{
+        display:'inline-flex', alignItems:'center', gap:6, marginBottom:16,
+        fontSize:13, color:'var(--text-3)', padding:'4px 0'
+      }}
+        onMouseEnter={e=>e.currentTarget.style.color='var(--text)'}
+        onMouseLeave={e=>e.currentTarget.style.color='var(--text-3)'}>
+        <I.chevL width={15} height={15} /> Tilbage
+      </button>
 
       {/* Header */}
       <div style={{

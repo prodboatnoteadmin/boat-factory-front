@@ -202,14 +202,6 @@ function ConfirmDialog({ title, message, onConfirm, onCancel, confirmLabel = 'Be
         padding:28, maxWidth:440, width:'100%',
         boxShadow:'0 30px 80px rgba(0,0,0,.6)'
       }}>
-        <div style={{
-          width:48, height:48, borderRadius:'50%',
-          background: danger ? 'rgba(232,72,85,.12)' : 'rgba(74,144,217,.12)',
-          color: danger ? '#ec6d77' : 'var(--blue)',
-          display:'flex', alignItems:'center', justifyContent:'center', marginBottom:18
-        }}>
-          {danger ? <window.Icons.trash width={22} height={22} /> : <window.Icons.check width={22} height={22} />}
-        </div>
         <h2 style={{margin:'0 0 8px', fontSize:20, fontWeight:700, letterSpacing:'-.02em'}}>{title}</h2>
         <p style={{margin:'0 0 22px', fontSize:14, color:'var(--text-2)', lineHeight:1.5}}>{message}</p>
         <div style={{display:'flex', gap:10, justifyContent:'flex-end'}}>

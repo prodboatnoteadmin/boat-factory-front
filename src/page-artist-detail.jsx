@@ -1,5 +1,5 @@
 // Artist detail — read-only stamdata, 2x2 hashtag grid, inline add
-function ArtistDetailPage({ artistId, onNav, onOpenBeat, onEditArtist }) {
+function ArtistDetailPage({ artistId, onBack, onNav, onOpenBeat, onEditArtist }) {
   const I = window.Icons;
   const artist = window.DATA.ARTISTS.find(a => a.id === artistId) || window.DATA.ARTISTS[0];
   const artistBeats = window.DATA.BEATS.filter(b => b.artist === artist.id);
@@ -13,12 +13,15 @@ function ArtistDetailPage({ artistId, onNav, onOpenBeat, onEditArtist }) {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:16, fontSize:13, color:'var(--text-3)' }}>
-        <button onClick={() => onNav('artists')} style={{color:'var(--text-3)'}} onMouseEnter={e=>e.currentTarget.style.color='var(--text)'} onMouseLeave={e=>e.currentTarget.style.color='var(--text-3)'}>Artists</button>
-        <I.chevR width={12} height={12} />
-        <span style={{color:'var(--text-2)'}}>{artist.name}</span>
-      </div>
+      {/* Back */}
+      <button onClick={onBack} style={{
+        display:'inline-flex', alignItems:'center', gap:6, marginBottom:16,
+        fontSize:13, color:'var(--text-3)', padding:'4px 0'
+      }}
+        onMouseEnter={e=>e.currentTarget.style.color='var(--text)'}
+        onMouseLeave={e=>e.currentTarget.style.color='var(--text-3)'}>
+        <I.chevL width={15} height={15} /> Tilbage
+      </button>
 
       {/* Header — read only */}
       <div style={{

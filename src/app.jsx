@@ -35,10 +35,17 @@ function App() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // route helpers
-  const nav = (page) => setRoute({ page, beatId: null, artistId: null });
-  const openBeat = (id) => setRoute({ page: 'beat-detail', beatId: id, artistId: null });
-  const openArtist = (id) => setRoute({ page: 'artist-detail', beatId: null, artistId: id });
+  // route helpers + a simple history stack powering the "Tilbage" button
+  const [history, setHistory] = useStateApp([]);
+  const go = (next) => { setHistory([...history, route]); setRoute(next); };
+  const goBack = () => {
+    if (history.length === 0) { setRoute({ page: 'beats', beatId: null, artistId: null }); return; }
+    setRoute(history[history.length - 1]);
+    setHistory(history.slice(0, -1));
+  };
+  const nav = (page) => go({ page, beatId: null, artistId: null });
+  const openBeat = (id) => go({ page: 'beat-detail', beatId: id, artistId: null });
+  const openArtist = (id) => go({ page: 'artist-detail', beatId: null, artistId: id });
   const openNewBeat = () => { setModalBeatId(null); setModalOpen(true); };
   const openEditBeat = (id) => { setModalBeatId(id); setModalOpen(true); };
   const openNewArtist = () => { setArtistModalId(null); setArtistModalOpen(true); };
@@ -102,7 +109,7 @@ function App() {
       pageEl = <window.BeatsPage onOpenBeat={openBeat} onNewBeat={openNewBeat} onAddToQueue={handleBulkAddToQueue} />;
       break;
     case 'beat-detail':
-      pageEl = <window.BeatDetailPage beatId={route.beatId} onBack={() => nav('beats')} onNav={nav}
+      pageEl = <window.BeatDetailPage beatId={route.beatId} onBack={goBack} onNav={nav}
                   onOpenArtist={openArtist} onEdit={() => openEditBeat(route.beatId)}
                   onDelete={() => deleteBeat(route.beatId)}
                   queueIds={queueIds}
@@ -112,7 +119,7 @@ function App() {
       pageEl = <window.ArtistsPage onOpenArtist={openArtist} onNewArtist={openNewArtist} />;
       break;
     case 'artist-detail':
-      pageEl = <window.ArtistDetailPage artistId={route.artistId} onNav={nav} onOpenBeat={openBeat} onEditArtist={openEditArtist} />;
+      pageEl = <window.ArtistDetailPage artistId={route.artistId} onBack={goBack} onNav={nav} onOpenBeat={openBeat} onEditArtist={openEditArtist} />;
       break;
     case 'queue':
       pageEl = <window.PublishQueuePage onOpenBeat={openBeat}

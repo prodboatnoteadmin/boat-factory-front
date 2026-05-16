@@ -85,9 +85,9 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
             </button>
 
             {coArtists.length > 0 && (
-              <div style={{display:'flex', alignItems:'center', gap:8, flexWrap:'wrap', flexShrink:0}}>
-                <span style={{fontSize:11, color:'var(--text-3)', letterSpacing:'.06em', textTransform:'uppercase', fontWeight:600}}>Co-artists:</span>
-                {coArtists.map(n => <window.Chip key={n}>{n}</window.Chip>)}
+              <div style={{flexShrink:0}}>
+                <div style={{fontSize:11, color:'var(--text-3)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:2, fontWeight:600}}>Co-Artists</div>
+                <div style={{fontSize:18, fontWeight:700, color:'var(--text)', letterSpacing:'-.01em'}}>{coArtists.join(', ')}</div>
               </div>
             )}
 
@@ -168,28 +168,30 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
                   <I.bs width={16} height={16} /> BeatStars
                 </span>
               )}
-              {youtubeLink ? (
-                <a href={youtubeLink} target="_blank" rel="noopener noreferrer" title="Åbn på YouTube" style={logoBtn(false)}>
-                  <I.yt width={16} height={16} style={{ color:'#ff2a2a' }} /> YouTube <I.ext width={12} height={12} />
-                </a>
-              ) : (
-                <span title="Intet YouTube-link" style={logoBtn(true)}>
-                  <I.yt width={16} height={16} /> YouTube
-                </span>
-              )}
-              {(() => {
-                const v = youtubeLink ? ytVideoId(youtubeLink) : null;
-                const url = v ? `https://studio.youtube.com/video/${v}/edit` : null;
-                return url ? (
-                  <a href={url} target="_blank" rel="noopener noreferrer" title="Åbn i YouTube Studio" style={logoBtn(false)}>
-                    <I.yt width={16} height={16} style={{ color:'#ff2a2a' }} /> YouTube Studio <I.ext width={12} height={12} />
+              <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
+                {youtubeLink ? (
+                  <a href={youtubeLink} target="_blank" rel="noopener noreferrer" title="Åbn på YouTube" style={logoBtn(false)}>
+                    <I.yt width={16} height={16} style={{ color:'#ff2a2a' }} /> YouTube <I.ext width={12} height={12} />
                   </a>
                 ) : (
                   <span title="Intet YouTube-link" style={logoBtn(true)}>
-                    <I.yt width={16} height={16} /> YouTube Studio
+                    <I.yt width={16} height={16} /> YouTube
                   </span>
-                );
-              })()}
+                )}
+                {(() => {
+                  const v = youtubeLink ? ytVideoId(youtubeLink) : null;
+                  const url = v ? `https://studio.youtube.com/video/${v}/edit` : null;
+                  return url ? (
+                    <a href={url} target="_blank" rel="noopener noreferrer" title="Åbn i YouTube Studio" style={logoBtn(false)}>
+                      <I.yt width={16} height={16} style={{ color:'#ff2a2a' }} /> YouTube Studio <I.ext width={12} height={12} />
+                    </a>
+                  ) : (
+                    <span title="Intet YouTube-link" style={logoBtn(true)}>
+                      <I.yt width={16} height={16} /> YouTube Studio
+                    </span>
+                  );
+                })()}
+              </div>
             </div>
           </window.Card>
           <window.Card title="Info">
@@ -260,6 +262,24 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
             cursor:'default'
           }}
         />
+      </window.Card>
+
+      {/* Read-only details */}
+      <window.Card title="Detaljer" style={{marginBottom:24}}>
+        <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+          {[
+            ['Oprettelsestidspunkt', beat.created ? new Date(beat.created).toLocaleString('da-DK') : '—'],
+            ['Filnavn', beat.fileName || '—'],
+            ['Foldersti', beat.filePath || '—'],
+            ['BeatStars link', beat.beatstars || '—'],
+            ['YouTube link', beat.youtube || '—'],
+          ].map(([label, value]) => (
+            <div key={label}>
+              <div style={{ fontSize:11, color:'var(--text-3)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:4, fontWeight:600 }}>{label}</div>
+              <div style={{ fontSize:13, color:'var(--text-2)', fontFamily:'JetBrains Mono, monospace', wordBreak:'break-all' }}>{value}</div>
+            </div>
+          ))}
+        </div>
       </window.Card>
     </div>
   );

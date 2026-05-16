@@ -154,43 +154,44 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
             return <YouTubePlaceholder beat={beat} inQueue={inQueue} queuePosition={queuePosition} hasJobs={jobs.length > 0} onNav={onNav} />;
           })()}
 
-          {/* Links under the video */}
-          <div style={{ display:'flex', alignItems:'center', gap:12, marginTop:14, flexWrap:'wrap' }}>
-            {beat.beatstars ? (
-              <a href={beat.beatstars} target="_blank" rel="noopener noreferrer" title="Åbn på BeatStars" style={logoBtn(false)}>
-                <I.bs width={16} height={16} style={{ color:'#E5384F' }} /> BeatStars <I.ext width={12} height={12} />
-              </a>
-            ) : (
-              <span title="Intet BeatStars-link" style={logoBtn(true)}>
-                <I.bs width={16} height={16} /> BeatStars
-              </span>
-            )}
-            {youtubeLink ? (
-              <a href={youtubeLink} target="_blank" rel="noopener noreferrer" title="Åbn på YouTube" style={logoBtn(false)}>
-                <I.yt width={16} height={16} style={{ color:'#ff2a2a' }} /> YouTube <I.ext width={12} height={12} />
-              </a>
-            ) : (
-              <span title="Intet YouTube-link" style={logoBtn(true)}>
-                <I.yt width={16} height={16} /> YouTube
-              </span>
-            )}
-            {(() => {
-              const v = youtubeLink ? ytVideoId(youtubeLink) : null;
-              const url = v ? `https://studio.youtube.com/video/${v}/edit` : null;
-              return url ? (
-                <a href={url} target="_blank" rel="noopener noreferrer" title="Åbn i YouTube Studio" style={logoBtn(false)}>
-                  <I.yt width={16} height={16} style={{ color:'#ff2a2a' }} /> YouTube Studio <I.ext width={12} height={12} />
-                </a>
-              ) : (
-                <span title="Intet YouTube-link" style={logoBtn(true)}>
-                  <I.yt width={16} height={16} /> YouTube Studio
-                </span>
-              );
-            })()}
-          </div>
         </div>
 
         <div style={{ display:'flex', flexDirection:'column', gap:24 }}>
+          <window.Card title="Links">
+            <div style={{ display:'flex', flexDirection:'column', gap:10, alignItems:'flex-start' }}>
+              {beat.beatstars ? (
+                <a href={beat.beatstars} target="_blank" rel="noopener noreferrer" title="Åbn på BeatStars" style={logoBtn(false)}>
+                  <I.bs width={16} height={16} style={{ color:'#E5384F' }} /> BeatStars <I.ext width={12} height={12} />
+                </a>
+              ) : (
+                <span title="Intet BeatStars-link" style={logoBtn(true)}>
+                  <I.bs width={16} height={16} /> BeatStars
+                </span>
+              )}
+              {youtubeLink ? (
+                <a href={youtubeLink} target="_blank" rel="noopener noreferrer" title="Åbn på YouTube" style={logoBtn(false)}>
+                  <I.yt width={16} height={16} style={{ color:'#ff2a2a' }} /> YouTube <I.ext width={12} height={12} />
+                </a>
+              ) : (
+                <span title="Intet YouTube-link" style={logoBtn(true)}>
+                  <I.yt width={16} height={16} /> YouTube
+                </span>
+              )}
+              {(() => {
+                const v = youtubeLink ? ytVideoId(youtubeLink) : null;
+                const url = v ? `https://studio.youtube.com/video/${v}/edit` : null;
+                return url ? (
+                  <a href={url} target="_blank" rel="noopener noreferrer" title="Åbn i YouTube Studio" style={logoBtn(false)}>
+                    <I.yt width={16} height={16} style={{ color:'#ff2a2a' }} /> YouTube Studio <I.ext width={12} height={12} />
+                  </a>
+                ) : (
+                  <span title="Intet YouTube-link" style={logoBtn(true)}>
+                    <I.yt width={16} height={16} /> YouTube Studio
+                  </span>
+                );
+              })()}
+            </div>
+          </window.Card>
           <window.Card title="Info">
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'14px 18px' }}>
               <Stat label="BPM" value={beat.bpm} mono />

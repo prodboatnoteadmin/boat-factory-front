@@ -8,6 +8,7 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
   const [draggingId, setDraggingId] = React.useState(null);
   const [dragOverId, setDragOverId] = React.useState(null);
   const [confirmDelete, setConfirmDelete] = React.useState(null); // for permanent delete from pending
+  const [confirmRemove, setConfirmRemove] = React.useState(null); // for "remove from queue" confirm
 
   const handleDragStart = (id) => setDraggingId(id);
   const handleDragOver = (e, id) => { e.preventDefault(); setDragOverId(id); };
@@ -25,10 +26,15 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
     handleDragEnd();
   };
 
-  // Move from queue → top of pending. No confirm.
+  // Move from queue → top of pending. (Confirmed via dialog.)
   const removeFromQueue = (id) => {
     setQueueIds(queueIds.filter(qId => qId !== id));
     setPendingIds([id, ...pendingIds.filter(pId => pId !== id)]);
+  };
+
+  // Move a queued beat to position #1.
+  const moveToTop = (id) => {
+    setQueueIds([id, ...queueIds.filter(qId => qId !== id)]);
   };
 
   // Move from pending → top of queue.
@@ -61,11 +67,23 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
         onDragEnd={handleDragEnd}
         onDrop={handleDrop}
         onOpenBeat={onOpenBeat}
-        onAction={removeFromQueue}
+        onAction={(id) => setConfirmRemove(id)}
+        onMoveTop={moveToTop}
         emptyText="Køen er tom."
         subtitle="Render-jobbet processeres oppefra og ned. Fjern → flyt til Draft."
         maxRowsBeforeScroll={null}
       />
+
+      {confirmRemove && (
+        <window.ConfirmDialog
+          title="Fjern fra køen?"
+          message="Er du sikker på, at du vil fjerne dette beat fra køen? Det flyttes tilbage til Draft."
+          onCancel={() => setConfirmRemove(null)}
+          onConfirm={() => { removeFromQueue(confirmRemove); setConfirmRemove(null); }}
+          confirmLabel="Fjern fra kø"
+          danger
+        />
+      )}
 
       {confirmDelete && (
         <window.ConfirmDialog
@@ -81,11 +99,11 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
   );
 }
 
-function QueuePanel({ title, subtitle, count, beats, isQueue, isPending, draggingId, dragOverId, onDragStart, onDragOver, onDragEnd, onDrop, onOpenBeat, onAction, onSecondaryAction, emptyText, maxRowsBeforeScroll }) {
+function QueuePanel({ title, subtitle, count, beats, isQueue, isPending, draggingId, dragOverId, onDragStart, onDragOver, onDragEnd, onDrop, onOpenBeat, onAction, onMoveTop, onSecondaryAction, emptyText, maxRowsBeforeScroll }) {
   const I = window.Icons;
 
   // Both panels share IDENTICAL columns. First col holds # for queue / "Tilføj til kø" button for draft.
-  const cols = '120px 26px minmax(180px, 2fr) minmax(140px, 1.2fr) 56px 64px 70px 76px 36px 48px';
+  const cols = '120px 26px minmax(180px, 2fr) minmax(140px, 1.2fr) 64px 64px 70px 76px 44px 48px';
 
   // Each row ≈ 50px tall (10px padding + 30px content + border).
   const ROW_HEIGHT = 50;
@@ -126,7 +144,7 @@ function QueuePanel({ title, subtitle, count, beats, isQueue, isPending, draggin
             <HeadCell>BPM</HeadCell>
             <HeadCell>Key</HeadCell>
             <HeadCell>Rating</HeadCell>
-            <HeadCell title="Tidligere YouTube-upload">YT</HeadCell>
+            <HeadCell></HeadCell>
             <HeadCell></HeadCell>
           </div>
         </div>
@@ -154,6 +172,7 @@ function QueuePanel({ title, subtitle, count, beats, isQueue, isPending, draggin
             onDrop={onDrop}
             onOpen={onOpenBeat}
             onAction={onAction}
+            onMoveTop={onMoveTop}
             onSecondaryAction={onSecondaryAction}
           />
         ))}
@@ -165,14 +184,15 @@ function QueuePanel({ title, subtitle, count, beats, isQueue, isPending, draggin
 function HeadCell({ children, title }) {
   return <span title={title} style={{
     fontSize:11, fontWeight:700, color:'var(--text-3)',
-    letterSpacing:'.08em', textTransform:'uppercase'
+    letterSpacing:'.08em', textTransform:'uppercase', whiteSpace:'nowrap'
   }}>{children}</span>;
 }
 
-function QueueRow({ beat, index, cols, isQueue, isPending, draggingId, dragOverId, onDragStart, onDragOver, onDragEnd, onDrop, onOpen, onAction, onSecondaryAction }) {
+function QueueRow({ beat, index, cols, isQueue, isPending, draggingId, dragOverId, onDragStart, onDragOver, onDragEnd, onDrop, onOpen, onAction, onMoveTop, onSecondaryAction }) {
   const I = window.Icons;
   const youtubeLink = window.getFirstYouTubeLink(beat.id);
   const previouslyPosted = !!youtubeLink;
+  const postedYt = previouslyPosted || !!beat.youtubeStatus;
 
   return (
     <div style={{ overflowX:'auto' }}>
@@ -207,17 +227,35 @@ function QueueRow({ beat, index, cols, isQueue, isPending, draggingId, dragOverI
         {isQueue ? (
           <span style={{ color:'var(--text-4)', cursor:'grab', display:'inline-flex' }}><I.drag width={14} height={14} /></span>
         ) : <span></span>}
-        <button onClick={() => onOpen(beat.id)} style={{textAlign:'left', minWidth:0, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>
-          <span style={{fontWeight:600, fontSize:13, color:'var(--text)'}}
+        <button onClick={() => onOpen(beat.id)} style={{textAlign:'left', minWidth:0, display:'flex', alignItems:'center', gap:6}}>
+          <span style={{fontWeight:600, fontSize:13, color:'var(--text)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}
             onMouseEnter={(e)=>e.target.style.color='var(--blue)'}
             onMouseLeave={(e)=>e.target.style.color='var(--text)'}>{beat.title}</span>
+          {postedYt && (
+            <span title="Postet på YouTube" style={{ display:'inline-flex', color:'#ff2a2a', flexShrink:0 }}>
+              <I.yt width={13} height={13} />
+            </span>
+          )}
         </button>
         <span style={{fontSize:12, color:'var(--text-2)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>{window.getArtistName(beat.artist)}</span>
         <span className="mono" style={{fontSize:12, color:'var(--text-3)'}}>{beat.year}</span>
         <span className="mono" style={{fontSize:12, color:'var(--text-2)'}}>{beat.bpm}</span>
         <span className="mono" style={{fontSize:12, color:'var(--text-2)'}}>{beat.key}</span>
         <span><window.CategoryPill category={beat.category} size="sm" /></span>
-        <YTIndicator previouslyPosted={previouslyPosted} />
+        {isQueue ? (
+          <button onClick={() => onMoveTop(beat.id)} disabled={index === 0}
+            title={index === 0 ? 'Allerede #1' : 'Flyt til #1'} style={{
+            width:28, height:28, borderRadius:5,
+            color: index === 0 ? 'var(--text-4)' : 'var(--text-2)',
+            border:'1px solid var(--border-strong)', background:'transparent',
+            display:'inline-flex', alignItems:'center', justifyContent:'center',
+            cursor: index === 0 ? 'not-allowed' : 'pointer'
+          }}
+            onMouseEnter={e=>{ if (index!==0){ e.currentTarget.style.background='rgba(74,144,217,.12)'; e.currentTarget.style.color='#7ab2ea'; e.currentTarget.style.borderColor='rgba(74,144,217,.5)'; } }}
+            onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; e.currentTarget.style.color=index===0?'var(--text-4)':'var(--text-2)'; e.currentTarget.style.borderColor='var(--border-strong)'; }}>
+            <I.chevUp width={14} height={14} />
+          </button>
+        ) : <span></span>}
         {isQueue ? (
           <button onClick={() => onAction(beat.id)} title="Fjern fra kø (→ Draft)" style={{
             width:28, height:28, borderRadius:5, color:'var(--text-3)',
@@ -241,27 +279,6 @@ function QueueRow({ beat, index, cols, isQueue, isPending, draggingId, dragOverI
         )}
       </div>
     </div>
-  );
-}
-
-function YTIndicator({ previouslyPosted }) {
-  if (previouslyPosted) {
-    return (
-      <span title="Tidligere postet på YouTube" style={{
-        display:'inline-flex', alignItems:'center', justifyContent:'center',
-        width:24, height:24, borderRadius:5, background:'rgba(255,42,42,.12)', color:'#ff5252',
-        border:'1px solid rgba(255,42,42,.3)'
-      }}>
-        <window.Icons.yt width={12} height={12} />
-      </span>
-    );
-  }
-  return (
-    <span title="Aldrig postet på YouTube" style={{
-      display:'inline-flex', alignItems:'center', justifyContent:'center',
-      width:24, height:24, borderRadius:5, background:'transparent', color:'var(--text-4)',
-      border:'1px dashed var(--border-strong)', fontSize:11, fontWeight:700
-    }}>—</span>
   );
 }
 

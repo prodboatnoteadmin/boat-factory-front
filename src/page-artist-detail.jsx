@@ -94,7 +94,7 @@ function ArtistDetailPage({ artistId, onBack, onNav, onOpenBeat, onEditArtist })
           placeholder="hashtag (uden #)"
         />
         <InlineTagGroup
-          title="TikTok A-Tags"
+          title="Søgeord for Beat type"
           subtitle="Primære søgeord — bruges først"
           tags={aTags}
           onAdd={(t) => { const next = [...aTags, t.replace(/^#+/, '')]; setATags(next); artist.aTags = next; persistTags('tiktok_a_tags', next); }}
@@ -103,7 +103,7 @@ function ArtistDetailPage({ artistId, onBack, onNav, onOpenBeat, onEditArtist })
           placeholder="a-tag…"
         />
         <InlineTagGroup
-          title="TikTok B-Tags"
+          title="Søgeord for Community"
           subtitle="Sekundære søgeord"
           tags={bTags}
           onAdd={(t) => { const next = [...bTags, t.replace(/^#+/, '')]; setBTags(next); artist.bTags = next; persistTags('tiktok_b_tags', next); }}
@@ -112,7 +112,7 @@ function ArtistDetailPage({ artistId, onBack, onNav, onOpenBeat, onEditArtist })
           placeholder="b-tag…"
         />
         <InlineTagGroup
-          title="TikTok C-Tags"
+          title="Søgeord for Producer/Trend"
           subtitle="Mood & teksturer — broader reach"
           tags={cTags}
           onAdd={(t) => { const next = [...cTags, t.replace(/^#+/, '')]; setCTags(next); artist.cTags = next; persistTags('tiktok_c_tags', next); }}

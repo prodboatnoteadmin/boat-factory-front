@@ -224,17 +224,49 @@ window.DB = {
     throwIf(error, 'Kunne ikke gemme tags');
   },
 
-  // Persist the publish queue: queueIds in order, pendingIds get no position.
-  async persistQueue(queueIds, pendingIds) {
-    const updates = [];
-    queueIds.forEach((id, i) => updates.push({ id, queue_position: i + 1 }));
-    (pendingIds || []).forEach((id) => updates.push({ id, queue_position: null }));
-    for (const u of updates) {
+  // Persist the publish queue in a SINGLE batched request (the queue can
+  // hold hundreds of beats — one update per beat would be far too slow
+  // and effectively never complete). A beat in the queue is, by
+  // definition, pending publication, so we also force status='pending'
+  // (otherwise it gets filtered out of the queue on the next load).
+  async persistQueue(queueIds) {
+    const ids = Array.isArray(queueIds) ? queueIds : [];
+    const stamp = nowIso();
+
+    // Beats that currently hold a queue position (to clear the ones
+    // that are no longer in the queue).
+    const { data: current, error: selErr } = await sb()
+      .from('beats')
+      .select('id')
+      .not('queue_position', 'is', null);
+    throwIf(selErr, 'Kunne ikke læse køen');
+
+    if (ids.length) {
+      const rows = ids.map((id, i) => ({
+        id,
+        queue_position: i + 1,
+        status: 'pending',
+        updated_at: stamp,
+      }));
+      const { data, error } = await sb()
+        .from('beats')
+        .upsert(rows, { onConflict: 'id' })
+        .select('id');
+      throwIf(error, 'Kunne ikke gemme køen');
+      if (!data || data.length !== rows.length) {
+        throw new Error('Køen blev ikke gemt korrekt — tjek rettigheder (RLS) i Supabase.');
+      }
+    }
+
+    const queueSet = new Set(ids);
+    const removed = (current || []).map(r => r.id).filter(id => !queueSet.has(id));
+    for (let i = 0; i < removed.length; i += 100) {
+      const chunk = removed.slice(i, i + 100);
       const { error } = await sb()
         .from('beats')
-        .update({ queue_position: u.queue_position, updated_at: nowIso() })
-        .eq('id', u.id);
-      throwIf(error, 'Kunne ikke gemme køen');
+        .update({ queue_position: null, updated_at: stamp })
+        .in('id', chunk);
+      throwIf(error, 'Kunne ikke opdatere køen');
     }
   },
 

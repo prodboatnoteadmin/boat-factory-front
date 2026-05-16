@@ -24,7 +24,7 @@ function App() {
   const firstQueueRun = useRefApp(true);
   useEffectApp(() => {
     if (firstQueueRun.current) { firstQueueRun.current = false; return; }
-    window.DB.persistQueue(queueIds, pendingIds)
+    window.DB.persistQueue(queueIds)
       .catch(e => alert('Kunne ikke gemme køen: ' + e.message));
   }, [queueIds, pendingIds]);
 

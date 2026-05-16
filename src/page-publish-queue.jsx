@@ -1,14 +1,36 @@
-// Queue page — side-by-side queue + pending, always visible, both scrollable
+// Queue page — same look & feel as the Beats list (search + artist
+// filter on top, identical row height & typography), plus queue-only
+// controls: drag-reorder, move-to-#1, and remove (with confirm).
+
+function QHead({ children }) {
+  return <span style={{
+    fontSize:11, fontWeight:700, color:'var(--text-3)',
+    textTransform:'uppercase', letterSpacing:'.08em', whiteSpace:'nowrap'
+  }}>{children}</span>;
+}
+
 function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPendingIds }) {
   const I = window.Icons;
-
-  const queueBeats = queueIds.map(id => window.DATA.BEATS.find(b => b.id === id)).filter(Boolean);
-  const pendingBeats = pendingIds.map(id => window.DATA.BEATS.find(b => b.id === id)).filter(Boolean);
-
+  const [search, setSearch] = React.useState('');
+  const [artistFilter, setArtistFilter] = React.useState('');
   const [draggingId, setDraggingId] = React.useState(null);
   const [dragOverId, setDragOverId] = React.useState(null);
-  const [confirmDelete, setConfirmDelete] = React.useState(null); // for permanent delete from pending
-  const [confirmRemove, setConfirmRemove] = React.useState(null); // for "remove from queue" confirm
+  const [confirmRemove, setConfirmRemove] = React.useState(null);
+
+  // Same column metrics as the Beats list (40/2fr/1.2fr/70/80/70) plus
+  // a position col, a drag handle, and two action buttons.
+  const cols = '44px 28px minmax(220px, 2fr) minmax(140px, 1.2fr) 70px 80px 70px 44px 48px';
+  const MIN_W = 860;
+
+  const queueBeats = queueIds
+    .map(id => window.DATA.BEATS.find(b => b.id === id))
+    .filter(Boolean);
+
+  const visible = queueBeats.filter(b => {
+    if (search && !b.title.toLowerCase().includes(search.toLowerCase())) return false;
+    if (artistFilter && b.artist !== artistFilter) return false;
+    return true;
+  });
 
   const handleDragStart = (id) => setDraggingId(id);
   const handleDragOver = (e, id) => { e.preventDefault(); setDragOverId(id); };
@@ -26,53 +48,127 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
     handleDragEnd();
   };
 
-  // Move from queue → top of pending. (Confirmed via dialog.)
   const removeFromQueue = (id) => {
     setQueueIds(queueIds.filter(qId => qId !== id));
     setPendingIds([id, ...pendingIds.filter(pId => pId !== id)]);
   };
-
-  // Move a queued beat to position #1.
   const moveToTop = (id) => {
     setQueueIds([id, ...queueIds.filter(qId => qId !== id)]);
   };
 
-  // Move from pending → top of queue.
-  const addToQueue = (id) => {
-    setPendingIds(pendingIds.filter(pId => pId !== id));
-    setQueueIds([id, ...queueIds.filter(qId => qId !== id)]);
-  };
-
-  // Delete from pending entirely. Confirm.
-  const deletePending = () => {
-    if (!confirmDelete) return;
-    setPendingIds(pendingIds.filter(id => id !== confirmDelete));
-    setConfirmDelete(null);
-  };
-
   return (
     <div>
-      <window.PageHeader title="Queue" subtitle="Drag-and-drop for at omarrangere køen.">
-      </window.PageHeader>
+      <window.PageHeader title="Queue" subtitle={`${visible.length} af ${queueBeats.length} i køen`} />
 
-      <QueuePanel
-        title="Pending queue"
-        count={queueBeats.length}
-        beats={queueBeats}
-        isQueue
-        draggingId={draggingId}
-        dragOverId={dragOverId}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-        onDrop={handleDrop}
-        onOpenBeat={onOpenBeat}
-        onAction={(id) => setConfirmRemove(id)}
-        onMoveTop={moveToTop}
-        emptyText="Køen er tom."
-        subtitle="Render-jobbet processeres oppefra og ned. Fjern → flyt til Draft."
-        maxRowsBeforeScroll={null}
-      />
+      {/* Filter bar — identical to Beats */}
+      <div style={{ display:'flex', gap:10, marginBottom:18, alignItems:'center', flexWrap:'wrap' }}>
+        <div style={{flex:'1 1 300px', minWidth:240}}>
+          <window.TextInput value={search} onChange={setSearch} placeholder="Søg songtitle…" icon={<I.search />} fullWidth />
+        </div>
+        <window.Select value={artistFilter} onChange={setArtistFilter} options={[
+          { value:'', label:'Alle artists' },
+          ...window.DATA.ARTISTS.map(a => ({ value:a.id, label:a.name }))
+        ]} style={{width:180}} />
+      </div>
+
+      {/* Table — same shell, row height & typography as Beats */}
+      <div style={{ background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:8, overflow:'hidden' }}>
+        <div style={{ overflowX:'auto' }}>
+          <div style={{
+            display:'grid', gridTemplateColumns: cols, gap:16,
+            alignItems:'center', padding:'14px 20px',
+            borderBottom:'1px solid var(--border)', background:'var(--bg-1)', minWidth: MIN_W
+          }}>
+            <QHead>#</QHead>
+            <QHead></QHead>
+            <QHead>Sangtitel</QHead>
+            <QHead>Artist</QHead>
+            <QHead>BPM</QHead>
+            <QHead>Key</QHead>
+            <QHead>Årstal</QHead>
+            <QHead></QHead>
+            <QHead></QHead>
+          </div>
+
+          {queueBeats.length === 0 && (
+            <div style={{padding:'48px', textAlign:'center', color:'var(--text-3)', fontSize:14}}>Køen er tom.</div>
+          )}
+          {queueBeats.length > 0 && visible.length === 0 && (
+            <div style={{padding:'48px', textAlign:'center', color:'var(--text-3)', fontSize:14}}>Ingen beats matcher filtrene.</div>
+          )}
+
+          {visible.map((b, vIdx) => {
+            const pos = queueIds.indexOf(b.id);
+            const ytLink = window.getFirstYouTubeLink(b.id);
+            const postedYt = !!ytLink || !!b.youtubeStatus;
+            const isDragTarget = dragOverId === b.id && draggingId !== b.id;
+            return (
+              <div key={b.id}
+                draggable
+                onDragStart={() => handleDragStart(b.id)}
+                onDragOver={(e) => handleDragOver(e, b.id)}
+                onDragEnd={handleDragEnd}
+                onDrop={(e) => handleDrop(e, b.id)}
+                onClick={() => onOpenBeat(b.id)}
+                style={{
+                  display:'grid', gridTemplateColumns: cols, gap:16,
+                  alignItems:'center', padding:'14px 20px',
+                  borderTop: vIdx === 0 ? 'none' : '1px solid var(--border)',
+                  background: isDragTarget ? 'rgba(74,144,217,.08)' : 'transparent',
+                  opacity: draggingId === b.id ? 0.45 : 1,
+                  transition:'background .12s', cursor:'pointer', color:'var(--text)',
+                  minWidth: MIN_W
+                }}
+                onMouseEnter={e => { if (!isDragTarget) e.currentTarget.style.background='var(--bg-hover)'; }}
+                onMouseLeave={e => { if (!isDragTarget) e.currentTarget.style.background='transparent'; }}
+              >
+                <span className="mono" style={{ fontSize:13, fontWeight:700, color: pos < 3 ? 'var(--text)' : 'var(--text-3)' }}>#{pos + 1}</span>
+                <span onClick={(e) => e.stopPropagation()} title="Træk for at omarrangere"
+                  style={{ color:'var(--text-4)', cursor:'grab', display:'inline-flex' }}>
+                  <I.drag width={15} height={15} />
+                </span>
+                <div style={{display:'flex', alignItems:'center', gap:10, minWidth:0}}>
+                  <span style={{fontWeight:600, fontSize:14, color:'var(--text)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>{b.title}</span>
+                  {postedYt && (
+                    <span title="Postet på YouTube" style={{ display:'inline-flex', color:'#ff2a2a', flexShrink:0 }}>
+                      <I.yt width={14} height={14} />
+                    </span>
+                  )}
+                </div>
+                <div style={{fontSize:13, color:'var(--text-2)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>{window.getArtistName(b.artist)}</div>
+                <div className="mono" style={{fontSize:13, color:'var(--text-2)'}}>{b.bpm}</div>
+                <div className="mono" style={{fontSize:13, color:'var(--text-2)'}}>{b.key}</div>
+                <div className="mono" style={{fontSize:13, color:'var(--text-3)'}}>{b.year}</div>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <button onClick={() => moveToTop(b.id)} disabled={pos === 0}
+                    title={pos === 0 ? 'Allerede #1' : 'Flyt til #1'} style={{
+                      width:28, height:28, borderRadius:5,
+                      color: pos === 0 ? 'var(--text-4)' : 'var(--text-2)',
+                      border:'1px solid var(--border-strong)', background:'transparent',
+                      display:'inline-flex', alignItems:'center', justifyContent:'center',
+                      cursor: pos === 0 ? 'not-allowed' : 'pointer'
+                    }}
+                    onMouseEnter={e=>{ if (pos!==0){ e.currentTarget.style.background='rgba(74,144,217,.12)'; e.currentTarget.style.color='#7ab2ea'; e.currentTarget.style.borderColor='rgba(74,144,217,.5)'; } }}
+                    onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; e.currentTarget.style.color=pos===0?'var(--text-4)':'var(--text-2)'; e.currentTarget.style.borderColor='var(--border-strong)'; }}>
+                    <I.chevUp width={15} height={15} />
+                  </button>
+                </div>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <button onClick={() => setConfirmRemove(b.id)} title="Fjern fra kø (→ Draft)" style={{
+                    width:28, height:28, borderRadius:5, color:'var(--text-3)',
+                    border:'1px solid var(--border-strong)', background:'transparent',
+                    display:'inline-flex', alignItems:'center', justifyContent:'center'
+                  }}
+                    onMouseEnter={e=>{e.currentTarget.style.background='rgba(232,72,85,.12)';e.currentTarget.style.color='#ec6d77';e.currentTarget.style.borderColor='rgba(232,72,85,.5)'}}
+                    onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='var(--text-3)';e.currentTarget.style.borderColor='var(--border-strong)'}}>
+                    <I.x width={13} height={13} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {confirmRemove && (
         <window.ConfirmDialog
@@ -84,200 +180,6 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
           danger
         />
       )}
-
-      {confirmDelete && (
-        <window.ConfirmDialog
-          title="Slet beat permanent fra Draft?"
-          message="Beatet fjernes fra draft-status. Stamdata på beatet bevares, men det vil ikke længere være planlagt til udgivelse."
-          onCancel={() => setConfirmDelete(null)}
-          onConfirm={deletePending}
-          confirmLabel="Slet permanent"
-          danger
-        />
-      )}
-    </div>
-  );
-}
-
-function QueuePanel({ title, subtitle, count, beats, isQueue, isPending, draggingId, dragOverId, onDragStart, onDragOver, onDragEnd, onDrop, onOpenBeat, onAction, onMoveTop, onSecondaryAction, emptyText, maxRowsBeforeScroll }) {
-  const I = window.Icons;
-
-  // Both panels share IDENTICAL columns. First col holds # for queue / "Tilføj til kø" button for draft.
-  const cols = '44px 26px minmax(180px, 2fr) minmax(140px, 1.2fr) 64px 64px 70px 76px 44px 48px';
-
-  // Each row ≈ 50px tall (10px padding + 30px content + border).
-  const ROW_HEIGHT = 50;
-  const scrollHeight = maxRowsBeforeScroll ? (maxRowsBeforeScroll * ROW_HEIGHT) : `calc(100vh - 240px)`;
-
-  return (
-    <div style={{
-      background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:8,
-      display:'flex', flexDirection:'column', overflow:'hidden',
-    }}>
-      {/* Panel header */}
-      <div style={{
-        padding:'16px 20px 14px', borderBottom:'1px solid var(--border)', background:'var(--bg-1)',
-        display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0
-      }}>
-        <div>
-          <div style={{ display:'flex', alignItems:'baseline', gap:10 }}>
-            <h3 style={{margin:0, fontSize:13, fontWeight:700, color:'var(--text)', textTransform:'uppercase', letterSpacing:'.08em'}}>{title}</h3>
-            <span className="mono" style={{ fontSize:13, fontWeight:700, color: isQueue ? 'var(--blue)' : 'var(--text-3)' }}>{count}</span>
-          </div>
-          <p style={{margin:'4px 0 0', fontSize:12, color:'var(--text-3)'}}>{subtitle}</p>
-        </div>
-      </div>
-
-      {/* Column headers */}
-      {beats.length > 0 && (
-        <div style={{ overflowX:'auto', flexShrink:0, borderBottom:'1px solid var(--border)' }}>
-          <div style={{
-            display:'grid', gridTemplateColumns: cols, gap:10,
-            alignItems:'center', padding:'10px 20px',
-            background:'var(--bg-2)', minWidth: 840
-          }}>
-            <HeadCell>{isQueue ? '#' : ''}</HeadCell>
-            <HeadCell></HeadCell>
-            <HeadCell>Sangtitel</HeadCell>
-            <HeadCell>Artist</HeadCell>
-            <HeadCell>Årstal</HeadCell>
-            <HeadCell>BPM</HeadCell>
-            <HeadCell>Key</HeadCell>
-            <HeadCell>Rating</HeadCell>
-            <HeadCell></HeadCell>
-            <HeadCell></HeadCell>
-          </div>
-        </div>
-      )}
-
-      {/* Rows — scrollable */}
-      <div style={{ overflowY:'auto', flex: maxRowsBeforeScroll ? '0 0 auto' : '1 1 auto', maxHeight: scrollHeight }}>
-        {beats.length === 0 && (
-          <div style={{padding:'48px 20px', textAlign:'center', color:'var(--text-3)', fontSize:14}}>
-            {emptyText}
-          </div>
-        )}
-        {beats.map((b, i) => (
-          <QueueRow key={b.id}
-            beat={b}
-            index={i}
-            cols={cols}
-            isQueue={isQueue}
-            isPending={isPending}
-            draggingId={draggingId}
-            dragOverId={dragOverId}
-            onDragStart={onDragStart}
-            onDragOver={onDragOver}
-            onDragEnd={onDragEnd}
-            onDrop={onDrop}
-            onOpen={onOpenBeat}
-            onAction={onAction}
-            onMoveTop={onMoveTop}
-            onSecondaryAction={onSecondaryAction}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function HeadCell({ children, title }) {
-  return <span title={title} style={{
-    fontSize:11, fontWeight:700, color:'var(--text-3)',
-    letterSpacing:'.08em', textTransform:'uppercase', whiteSpace:'nowrap'
-  }}>{children}</span>;
-}
-
-function QueueRow({ beat, index, cols, isQueue, isPending, draggingId, dragOverId, onDragStart, onDragOver, onDragEnd, onDrop, onOpen, onAction, onMoveTop, onSecondaryAction }) {
-  const I = window.Icons;
-  const youtubeLink = window.getFirstYouTubeLink(beat.id);
-  const previouslyPosted = !!youtubeLink;
-  const postedYt = previouslyPosted || !!beat.youtubeStatus;
-
-  return (
-    <div style={{ overflowX:'auto' }}>
-      <div
-        draggable={isQueue}
-        onDragStart={isQueue ? () => onDragStart(beat.id) : undefined}
-        onDragOver={isQueue ? (e) => onDragOver(e, beat.id) : undefined}
-        onDragEnd={isQueue ? onDragEnd : undefined}
-        onDrop={isQueue ? (e) => onDrop(e, beat.id) : undefined}
-        style={{
-          display:'grid', gridTemplateColumns: cols, gap:10,
-          alignItems:'center', padding:'10px 20px',
-          borderBottom:'1px solid var(--border)',
-          background: dragOverId === beat.id && draggingId !== beat.id ? 'rgba(74,144,217,.08)' : 'transparent',
-          opacity: draggingId === beat.id ? 0.45 : 1,
-          transition:'background .12s', minWidth:840
-        }}>
-        {isQueue ? (
-          <span className="mono" style={{ fontSize:13, fontWeight:700, color: index < 3 ? 'var(--text)' : 'var(--text-3)' }}>#{index+1}</span>
-        ) : (
-          <button onClick={() => onAction(beat.id)} title="Læg øverst i Pending queue" style={{
-            height:30, borderRadius:5, fontSize:12, fontWeight:600,
-            background:'var(--blue)', color:'#fff', border:'1px solid var(--blue)',
-            display:'inline-flex', alignItems:'center', justifyContent:'center', gap:5,
-            padding:'0 10px', width:'100%'
-          }}
-            onMouseEnter={e => e.currentTarget.style.background='#5ba0e6'}
-            onMouseLeave={e => e.currentTarget.style.background='var(--blue)'}>
-            <I.plus width={11} height={11} />Tilføj til kø
-          </button>
-        )}
-        {isQueue ? (
-          <span style={{ color:'var(--text-4)', cursor:'grab', display:'inline-flex' }}><I.drag width={14} height={14} /></span>
-        ) : <span></span>}
-        <button onClick={() => onOpen(beat.id)} style={{textAlign:'left', minWidth:0, display:'flex', alignItems:'center', gap:6}}>
-          <span style={{fontWeight:600, fontSize:13, color:'var(--text)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}
-            onMouseEnter={(e)=>e.target.style.color='var(--blue)'}
-            onMouseLeave={(e)=>e.target.style.color='var(--text)'}>{beat.title}</span>
-          {postedYt && (
-            <span title="Postet på YouTube" style={{ display:'inline-flex', color:'#ff2a2a', flexShrink:0 }}>
-              <I.yt width={13} height={13} />
-            </span>
-          )}
-        </button>
-        <span style={{fontSize:12, color:'var(--text-2)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>{window.getArtistName(beat.artist)}</span>
-        <span className="mono" style={{fontSize:12, color:'var(--text-3)'}}>{beat.year}</span>
-        <span className="mono" style={{fontSize:12, color:'var(--text-2)'}}>{beat.bpm}</span>
-        <span className="mono" style={{fontSize:12, color:'var(--text-2)'}}>{beat.key}</span>
-        <span><window.CategoryPill category={beat.category} size="sm" /></span>
-        {isQueue ? (
-          <button onClick={() => onMoveTop(beat.id)} disabled={index === 0}
-            title={index === 0 ? 'Allerede #1' : 'Flyt til #1'} style={{
-            width:28, height:28, borderRadius:5,
-            color: index === 0 ? 'var(--text-4)' : 'var(--text-2)',
-            border:'1px solid var(--border-strong)', background:'transparent',
-            display:'inline-flex', alignItems:'center', justifyContent:'center',
-            cursor: index === 0 ? 'not-allowed' : 'pointer'
-          }}
-            onMouseEnter={e=>{ if (index!==0){ e.currentTarget.style.background='rgba(74,144,217,.12)'; e.currentTarget.style.color='#7ab2ea'; e.currentTarget.style.borderColor='rgba(74,144,217,.5)'; } }}
-            onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; e.currentTarget.style.color=index===0?'var(--text-4)':'var(--text-2)'; e.currentTarget.style.borderColor='var(--border-strong)'; }}>
-            <I.chevUp width={14} height={14} />
-          </button>
-        ) : <span></span>}
-        {isQueue ? (
-          <button onClick={() => onAction(beat.id)} title="Fjern fra kø (→ Draft)" style={{
-            width:28, height:28, borderRadius:5, color:'var(--text-3)',
-            border:'1px solid var(--border-strong)', background:'transparent',
-            display:'inline-flex', alignItems:'center', justifyContent:'center'
-          }}
-            onMouseEnter={e=>{e.currentTarget.style.background='rgba(232,72,85,.12)';e.currentTarget.style.color='#ec6d77';e.currentTarget.style.borderColor='rgba(232,72,85,.5)'}}
-            onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='var(--text-3)';e.currentTarget.style.borderColor='var(--border-strong)'}}>
-            <I.x width={12} height={12} />
-          </button>
-        ) : (
-          <button onClick={() => onSecondaryAction(beat.id)} title="Slet permanent" style={{
-            width:28, height:28, borderRadius:5, color:'var(--text-3)',
-            border:'1px solid var(--border-strong)', background:'transparent',
-            display:'inline-flex', alignItems:'center', justifyContent:'center'
-          }}
-            onMouseEnter={e=>{e.currentTarget.style.background='rgba(232,72,85,.12)';e.currentTarget.style.color='#ec6d77';e.currentTarget.style.borderColor='rgba(232,72,85,.5)'}}
-            onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='var(--text-3)';e.currentTarget.style.borderColor='var(--border-strong)'}}>
-            <I.trash width={12} height={12} />
-          </button>
-        )}
-      </div>
     </div>
   );
 }

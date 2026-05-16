@@ -586,9 +586,9 @@ Free for non profit use only. Must give credit ${creditLine}
 Bpm: ${bpm}
 Key: ${key}
 
-Instagram:   https://www.instagram.com/prodboatnote/
-Email:      prodboatnote@gmail.com
-Beat Store: https://boatnote.beatstars.com/
+${'Instagram:'.padEnd(11)} https://www.instagram.com/prodboatnote/
+${'Email:'.padEnd(11)} prodboatnote@gmail.com
+${'Beat Store:'.padEnd(11)} https://boatnote.beatstars.com/
 
 This Beat is FREE for non-profit use ONLY. Any Use of my beats "Including leased beats" REQUIRE CREDIT IN THE TITLE (Prod. by Boat Note). There are NO Exceptions.
 The free version of this beat is NOT available for streaming services such as Spotify or Apple Music Etc.

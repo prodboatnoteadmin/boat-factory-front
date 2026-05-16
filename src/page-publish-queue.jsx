@@ -155,7 +155,7 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
                 <div className="mono" style={{fontSize:13, color:'var(--text-2)'}}>{b.bpm}</div>
                 <div className="mono" style={{fontSize:13, color:'var(--text-2)'}}>{b.key}</div>
                 <div className="mono" style={{fontSize:13, color:'var(--text-3)'}}>{b.year}</div>
-                <div><window.CategoryPill category={b.category} size="sm" /></div>
+                <div style={{fontSize:13, color:'var(--text-2)'}}>{b.category ? (b.category.charAt(0).toUpperCase() + b.category.slice(1)) : ''}</div>
                 <div onClick={(e) => e.stopPropagation()}>
                   <button onClick={() => moveToTop(b.id)} disabled={pos === 0}
                     title={pos === 0 ? 'Allerede #1' : 'Flyt til #1'} style={{

@@ -68,7 +68,7 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
         paddingBottom:24, borderBottom:'1px solid var(--border)'
       }}>
         <div style={{minWidth:0, flex:1}}>
-          <div style={{display:'flex', alignItems:'center', gap:20, minWidth:0}}>
+          <div style={{display:'flex', alignItems:'center', gap:20, minWidth:0, flexWrap:'wrap'}}>
             <button onClick={() => onOpenArtist(beat.artist)} style={{
               display:'inline-flex', alignItems:'center', gap:12, padding:0,
               background:'transparent', textAlign:'left', flexShrink:0
@@ -84,6 +84,13 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
               </div>
             </button>
 
+            {coArtists.length > 0 && (
+              <div style={{display:'flex', alignItems:'center', gap:8, flexWrap:'wrap', flexShrink:0}}>
+                <span style={{fontSize:11, color:'var(--text-3)', letterSpacing:'.06em', textTransform:'uppercase', fontWeight:600}}>Co-artists:</span>
+                {coArtists.map(n => <window.Chip key={n}>{n}</window.Chip>)}
+              </div>
+            )}
+
             <div style={{width:1, alignSelf:'stretch', background:'var(--border)', flexShrink:0}}></div>
 
             <h1 style={{
@@ -91,12 +98,6 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
               minWidth:0, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'
             }}>{beat.title}</h1>
           </div>
-          {coArtists.length > 0 && (
-            <div style={{marginTop:14, display:'flex', alignItems:'center', gap:8, flexWrap:'wrap'}}>
-              <span style={{fontSize:11, color:'var(--text-3)', letterSpacing:'.06em', textTransform:'uppercase', fontWeight:600}}>Co-artists:</span>
-              {coArtists.map(n => <window.Chip key={n}>{n}</window.Chip>)}
-            </div>
-          )}
         </div>
 
         <div style={{display:'flex', gap:8, alignItems:'center'}}>
@@ -153,8 +154,8 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
             return <YouTubePlaceholder beat={beat} inQueue={inQueue} queuePosition={queuePosition} hasJobs={jobs.length > 0} onNav={onNav} />;
           })()}
 
-          {/* Logo-links */}
-          <div style={{ display:'flex', alignItems:'center', gap:12, marginTop:14 }}>
+          {/* Links under the video */}
+          <div style={{ display:'flex', alignItems:'center', gap:12, marginTop:14, flexWrap:'wrap' }}>
             {beat.beatstars ? (
               <a href={beat.beatstars} target="_blank" rel="noopener noreferrer" title="Åbn på BeatStars" style={logoBtn(false)}>
                 <I.bs width={16} height={16} style={{ color:'#E5384F' }} /> BeatStars <I.ext width={12} height={12} />
@@ -173,45 +174,23 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
                 <I.yt width={16} height={16} /> YouTube
               </span>
             )}
+            {(() => {
+              const v = youtubeLink ? ytVideoId(youtubeLink) : null;
+              const url = v ? `https://studio.youtube.com/video/${v}/edit` : null;
+              return url ? (
+                <a href={url} target="_blank" rel="noopener noreferrer" title="Åbn i YouTube Studio" style={logoBtn(false)}>
+                  <I.yt width={16} height={16} style={{ color:'#ff2a2a' }} /> YouTube Studio <I.ext width={12} height={12} />
+                </a>
+              ) : (
+                <span title="Intet YouTube-link" style={logoBtn(true)}>
+                  <I.yt width={16} height={16} /> YouTube Studio
+                </span>
+              );
+            })()}
           </div>
         </div>
 
         <div style={{ display:'flex', flexDirection:'column', gap:24 }}>
-          <window.Card title="Links">
-            <div style={{ display:'flex', flexDirection:'column', gap:10, alignItems:'flex-start' }}>
-              {beat.beatstars ? (
-                <a href={beat.beatstars} target="_blank" rel="noopener noreferrer" title="Åbn på BeatStars" style={logoBtn(false)}>
-                  <I.bs width={16} height={16} style={{ color:'#E5384F' }} /> BeatStars <I.ext width={12} height={12} />
-                </a>
-              ) : (
-                <span title="Intet BeatStars-link" style={logoBtn(true)}>
-                  <I.bs width={16} height={16} /> BeatStars
-                </span>
-              )}
-              {youtubeLink ? (
-                <a href={youtubeLink} target="_blank" rel="noopener noreferrer" title="Åbn på YouTube" style={logoBtn(false)}>
-                  <I.yt width={16} height={16} style={{ color:'#ff2a2a' }} /> YouTube <I.ext width={12} height={12} />
-                </a>
-              ) : (
-                <span title="Intet YouTube-link" style={logoBtn(true)}>
-                  <I.yt width={16} height={16} /> YouTube
-                </span>
-              )}
-              {(() => {
-                const v = youtubeLink ? ytVideoId(youtubeLink) : null;
-                const url = v ? `https://studio.youtube.com/video/${v}/edit` : null;
-                return url ? (
-                  <a href={url} target="_blank" rel="noopener noreferrer" title="Åbn i YouTube Studio" style={logoBtn(false)}>
-                    <I.yt width={16} height={16} style={{ color:'#ff2a2a' }} /> YouTube Studio <I.ext width={12} height={12} />
-                  </a>
-                ) : (
-                  <span title="Intet YouTube-link" style={logoBtn(true)}>
-                    <I.yt width={16} height={16} /> YouTube Studio
-                  </span>
-                );
-              })()}
-            </div>
-          </window.Card>
           <window.Card title="Info">
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'14px 18px' }}>
               <Stat label="BPM" value={beat.bpm} mono />

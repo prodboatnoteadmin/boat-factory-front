@@ -9,7 +9,13 @@ function ArtistDetailPage({ artistId, onBack, onNav, onOpenBeat, onEditArtist })
   const [cTags, setCTags] = React.useState(artist.cTags || []);
   const [hashtags, setHashtags] = React.useState(artist.artistHashtags || []);
   const [ytKw, setYtKw] = React.useState(artist.youtubeKeywords || '');
-  const [notes, setNotes] = React.useState(artist.notes || '');
+  const ytKwRef = React.useRef(null);
+
+  // Grow the keywords field so the whole text is visible.
+  React.useEffect(() => {
+    const ta = ytKwRef.current;
+    if (ta) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }
+  }, [ytKw]);
 
   return (
     <div>
@@ -99,19 +105,11 @@ function ArtistDetailPage({ artistId, onBack, onNav, onOpenBeat, onEditArtist })
       {/* YouTube keywords — full width */}
       <window.Card title="YouTube Keywords" style={{marginBottom:16}}>
         <div style={{fontSize:12, color:'var(--text-3)', marginTop:-6, marginBottom:14}}>Komma-separeret. Tilføjes til alle uploads under denne artist.</div>
-        <textarea value={ytKw} onChange={e => setYtKw(e.target.value)} placeholder="gunna type beat, dripseason, melodic trap, atlanta…" style={{
-          width:'100%', minHeight:80, padding:14,
-          background:'var(--bg-1)', border:'1px solid var(--border-strong)', borderRadius:6,
-          color:'var(--text)', fontSize:14, fontFamily:'inherit', resize:'vertical', outline:'none'
-        }} />
-      </window.Card>
-
-      {/* Notes */}
-      <window.Card title="Noter">
-        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Skriv noter om denne artists præferencer, tempo, key…" style={{
+        <textarea ref={ytKwRef} value={ytKw} onChange={e => setYtKw(e.target.value)} spellCheck={false} placeholder="gunna type beat, dripseason, melodic trap, atlanta…" style={{
           width:'100%', minHeight:120, padding:14,
           background:'var(--bg-1)', border:'1px solid var(--border-strong)', borderRadius:6,
-          color:'var(--text)', fontSize:14, fontFamily:'inherit', resize:'vertical', outline:'none'
+          color:'var(--text)', fontSize:14, lineHeight:1.55, fontFamily:'inherit',
+          resize:'vertical', outline:'none', overflow:'hidden', display:'block'
         }} />
       </window.Card>
     </div>

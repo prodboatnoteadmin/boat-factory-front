@@ -18,6 +18,16 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
   const queuePosition = queueIds.indexOf(beat.id);
   const inQueue = queuePosition !== -1;
 
+  const logoBtn = (disabled) => ({
+    display:'inline-flex', alignItems:'center', gap:8,
+    padding:'8px 14px', borderRadius:6,
+    border:'1px solid var(--border-strong)', background:'var(--bg-1)',
+    color: disabled ? 'var(--text-4)' : 'var(--text)',
+    fontSize:13, fontWeight:600,
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.5 : 1,
+  });
+
   // Rebuild the description when switching to another beat.
   React.useEffect(() => {
     setDesc(buildYouTubeDescription(beat));
@@ -94,74 +104,97 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
         </div>
       </div>
 
-      {/* YouTube — real embed for beats that have a YouTube link */}
-      <div style={{ marginBottom:28 }}>
-        {(() => {
-          const vid = youtubeLink ? ytVideoId(youtubeLink) : null;
-          if (vid) {
-            return (
-              <div style={{
-                position:'relative', borderRadius:10, overflow:'hidden',
-                aspectRatio:'16/9', background:'#000',
-                border:'1px solid var(--border)',
-              }}>
-                <iframe
-                  src={`https://www.youtube.com/embed/${vid}`}
-                  title={`${beat.title} · ${window.getArtistName(beat.artist)}`}
-                  style={{ position:'absolute', inset:0, width:'100%', height:'100%', border:0 }}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  referrerPolicy="strict-origin-when-cross-origin"
-                />
-              </div>
-            );
-          }
-          if (youtubeLink) {
-            return (
-              <div style={{
-                borderRadius:10, border:'1px solid var(--border)', background:'var(--bg-1)',
-                padding:'22px 24px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:16
-              }}>
-                <div style={{ fontSize:14, color:'var(--text-2)' }}>
-                  Linket kunne ikke indlejres som YouTube-video.
+      {/* Video (2/3) + Info & Collab stacked to the right */}
+      <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:24, marginBottom:24, alignItems:'start' }}>
+        <div>
+          {(() => {
+            const vid = youtubeLink ? ytVideoId(youtubeLink) : null;
+            if (vid) {
+              return (
+                <div style={{
+                  position:'relative', borderRadius:10, overflow:'hidden',
+                  aspectRatio:'16/9', background:'#000',
+                  border:'1px solid var(--border)',
+                }}>
+                  <iframe
+                    src={`https://www.youtube.com/embed/${vid}`}
+                    title={`${beat.title} · ${window.getArtistName(beat.artist)}`}
+                    style={{ position:'absolute', inset:0, width:'100%', height:'100%', border:0 }}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    referrerPolicy="strict-origin-when-cross-origin"
+                  />
                 </div>
-                <a href={youtubeLink} target="_blank" rel="noopener noreferrer" style={{ fontSize:13, color:'var(--blue)', display:'inline-flex', alignItems:'center', gap:6, flexShrink:0 }}>
-                  Åbn link <I.ext width={12} height={12} />
-                </a>
-              </div>
-            );
-          }
-          return <YouTubePlaceholder beat={beat} inQueue={inQueue} queuePosition={queuePosition} hasJobs={jobs.length > 0} onNav={onNav} />;
-        })()}
-      </div>
+              );
+            }
+            if (youtubeLink) {
+              return (
+                <div style={{
+                  borderRadius:10, border:'1px solid var(--border)', background:'var(--bg-1)',
+                  padding:'22px 24px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:16
+                }}>
+                  <div style={{ fontSize:14, color:'var(--text-2)' }}>
+                    Linket kunne ikke indlejres som YouTube-video.
+                  </div>
+                  <a href={youtubeLink} target="_blank" rel="noopener noreferrer" style={{ fontSize:13, color:'var(--blue)', display:'inline-flex', alignItems:'center', gap:6, flexShrink:0 }}>
+                    Åbn link <I.ext width={12} height={12} />
+                  </a>
+                </div>
+              );
+            }
+            return <YouTubePlaceholder beat={beat} inQueue={inQueue} queuePosition={queuePosition} hasJobs={jobs.length > 0} onNav={onNav} />;
+          })()}
 
-      {/* Info row */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:24, marginBottom:24 }}>
-        <window.Card title="Info">
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'14px 18px' }}>
-            <Stat label="BPM" value={beat.bpm} mono />
-            <Stat label="Key" value={beat.key} mono />
-            <Stat label="Year" value={beat.year} mono />
+          {/* Logo-links */}
+          <div style={{ display:'flex', alignItems:'center', gap:12, marginTop:14 }}>
+            {beat.beatstars ? (
+              <a href={beat.beatstars} target="_blank" rel="noopener noreferrer" title="Åbn på BeatStars" style={logoBtn(false)}>
+                <I.bs width={16} height={16} style={{ color:'#E5384F' }} /> BeatStars <I.ext width={12} height={12} />
+              </a>
+            ) : (
+              <span title="Intet BeatStars-link" style={logoBtn(true)}>
+                <I.bs width={16} height={16} /> BeatStars
+              </span>
+            )}
+            {youtubeLink ? (
+              <a href={youtubeLink} target="_blank" rel="noopener noreferrer" title="Åbn på YouTube" style={logoBtn(false)}>
+                <I.yt width={16} height={16} style={{ color:'#ff2a2a' }} /> YouTube <I.ext width={12} height={12} />
+              </a>
+            ) : (
+              <span title="Intet YouTube-link" style={logoBtn(true)}>
+                <I.yt width={16} height={16} /> YouTube
+              </span>
+            )}
           </div>
-        </window.Card>
+        </div>
 
-        <window.Card title="Collab">
-          <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-            <div>
-              <div style={{fontSize:11, color:'var(--text-3)', marginBottom:6, letterSpacing:'.06em', textTransform:'uppercase'}}>Primær collab</div>
-              {collab
-                ? <window.Chip accent="blue">{collab}</window.Chip>
-                : <span style={{fontSize:13, color:'var(--text-3)'}}>Ingen collab</span>}
+        <div style={{ display:'flex', flexDirection:'column', gap:24 }}>
+          <window.Card title="Info">
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'14px 18px' }}>
+              <Stat label="BPM" value={beat.bpm} mono />
+              <Stat label="Key" value={beat.key} mono />
+              <Stat label="Year" value={beat.year} mono />
             </div>
-            <div>
-              <div style={{fontSize:11, color:'var(--text-3)', marginBottom:6, letterSpacing:'.06em', textTransform:'uppercase'}}>Co-Collabs</div>
-              <div style={{display:'flex', flexWrap:'wrap', gap:8}}>
-                {coCollabs.length === 0 && <span style={{fontSize:13, color:'var(--text-3)'}}>Ingen co-collabs</span>}
-                {coCollabs.map(n => <window.Chip key={n}>{n}</window.Chip>)}
+          </window.Card>
+
+          <window.Card title="Collab">
+            <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+              <div>
+                <div style={{fontSize:11, color:'var(--text-3)', marginBottom:6, letterSpacing:'.06em', textTransform:'uppercase'}}>Primær collab</div>
+                {collab
+                  ? <window.Chip accent="blue">{collab}</window.Chip>
+                  : <span style={{fontSize:13, color:'var(--text-3)'}}>Ingen collab</span>}
+              </div>
+              <div>
+                <div style={{fontSize:11, color:'var(--text-3)', marginBottom:6, letterSpacing:'.06em', textTransform:'uppercase'}}>Co-Collabs</div>
+                <div style={{display:'flex', flexWrap:'wrap', gap:8}}>
+                  {coCollabs.length === 0 && <span style={{fontSize:13, color:'var(--text-3)'}}>Ingen co-collabs</span>}
+                  {coCollabs.map(n => <window.Chip key={n}>{n}</window.Chip>)}
+                </div>
               </div>
             </div>
-          </div>
-        </window.Card>
+          </window.Card>
+        </div>
       </div>
 
       {/* Udgivelses-historik — between Info and YouTube beskrivelse */}

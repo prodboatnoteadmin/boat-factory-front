@@ -59,41 +59,43 @@ function BeatFormModal({ open, beatId, onClose, onSave }) {
         {/* body */}
         <div style={{padding:'24px', maxHeight:'70vh', overflow:'auto'}}>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
-            <Field label="Songtitle" required full>
-              <window.TextInput value={form.title} onChange={(v) => set('title', v)} placeholder="Got My Way" fullWidth />
+            <Field label="Navn" required>
+              <window.TextInput value={form.title} onChange={(v) => set('title', v)} placeholder="Skriv navnet på beatet" fullWidth />
             </Field>
             <Field label="Artist" required>
-              <window.Select value={form.artist} onChange={(v) => set('artist', v)} placeholder="Vælg artist" options={[
+              <window.Select value={form.artist} onChange={(v) => set('artist', v)} options={[
                 ...window.DATA.ARTISTS.map(a => ({ value:a.id, label:a.name })),
                 { value:'__new', label:'+ Opret ny artist' },
               ]} />
             </Field>
-            <Field label="Year">
-              <window.TextInput value={form.year} onChange={(v) => set('year', v)} placeholder="2026" fullWidth />
+
+            <Field label="Co-Artists">
+              <ChipInput values={form.coArtists} onChange={(v) => set('coArtists', v)} placeholder="Skriv co-artists navn + Enter" />
             </Field>
+            <Field label="Årstal">
+              <window.TextInput value={form.year} onChange={(v) => set('year', v)} fullWidth />
+            </Field>
+
             <Field label="BPM">
-              <window.TextInput value={form.bpm} onChange={(v) => set('bpm', v)} placeholder="140" type="number" fullWidth />
+              <window.TextInput value={form.bpm} onChange={(v) => set('bpm', v)} placeholder="Skriv beatets BPM" type="number" fullWidth />
             </Field>
             <Field label="Key">
               <window.Select value={form.key} onChange={(v) => set('key', v)} placeholder="Vælg key" options={window.DATA.KEYS} />
             </Field>
 
-            <Field label="Co-Artists" full>
-              <ChipInput values={form.coArtists} onChange={(v) => set('coArtists', v)} placeholder="Skriv navn + Enter" />
-            </Field>
-
             <Field label="Collab">
-              <window.TextInput value={form.collab} onChange={(v) => set('collab', v)} placeholder="theboycasa" fullWidth />
+              <window.TextInput value={form.collab} onChange={(v) => set('collab', v)} placeholder="Skriv primær collab" fullWidth />
             </Field>
             <Field label="Co-Collabs">
-              <ChipInput values={form.coCollabs} onChange={(v) => set('coCollabs', v)} placeholder="Skriv navn + Enter" />
+              <ChipInput values={form.coCollabs} onChange={(v) => set('coCollabs', v)} placeholder="Skriv co-collabs navn + Enter" />
             </Field>
 
-            <Field label="BeatStars link" required full>
-              <window.TextInput value={form.beatstars} onChange={(v) => set('beatstars', v)} placeholder="https://beatstars.com/…" fullWidth />
+            <Field label="Beatstars link" required full>
+              <window.TextInput value={form.beatstars} onChange={(v) => set('beatstars', v)} placeholder="Skriv linket til beatet på Beatstars" fullWidth />
             </Field>
-            <Field label="File Name" required>
-              <window.TextInput value={form.fileName} onChange={(v) => set('fileName', v)} placeholder="GotMyWay_Gunna_131_Cmin.wav" fullWidth />
+
+            <Field label="Filnavn" required>
+              <window.TextInput value={form.fileName} onChange={(v) => set('fileName', v)} placeholder="Skriv det præcise filnavn (fx. beat.mp3)" fullWidth />
             </Field>
             <Field label="Collab folder">
               <CollabFolderInput value={form.filePath} onChange={(v) => set('filePath', v)} />
@@ -121,15 +123,15 @@ function CollabFolderInput({ value, onChange }) {
       background:'var(--bg-1)', border:`1px solid ${focus ? 'var(--blue)' : 'var(--border-strong)'}`,
       borderRadius:6, height:38, transition:'border-color .15s', overflow:'hidden'
     }}>
-      <span style={{ fontSize:14, color:'var(--text-2)', whiteSpace:'nowrap', fontFamily:'JetBrains Mono, monospace' }}>@boatnote x @</span>
+      <span style={{ fontSize:14, color:'var(--text-3)', whiteSpace:'nowrap', fontFamily:'JetBrains Mono, monospace' }}>@Boatnote x @</span>
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setFocus(true)}
         onBlur={() => setFocus(false)}
-        placeholder="Indtast Collab"
+        placeholder="Skriv navn"
         style={{ flex:1, background:'transparent', border:'none', outline:'none', color:'var(--text)', fontSize:14, minWidth:80, padding:'0 2px', fontFamily:'JetBrains Mono, monospace' }} />
-      <span style={{ fontSize:14, color:'var(--text-2)', whiteSpace:'nowrap', fontFamily:'JetBrains Mono, monospace', paddingRight:8 }}>"Beats</span>
+      <span style={{ fontSize:14, color:'var(--text-3)', whiteSpace:'nowrap', fontFamily:'JetBrains Mono, monospace', paddingRight:8 }}>{' Beats'}</span>
     </div>
   );
 }

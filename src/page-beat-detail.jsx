@@ -74,13 +74,10 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
               background:'transparent', textAlign:'left', flexShrink:0
             }}>
               <window.ArtistAvatar id={beat.artist} name={artist?.name || beat.artist} size={48} />
-              <div>
-                <div style={{fontSize:11, color:'var(--text-3)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:2, fontWeight:600}}>Artist</div>
-                <div style={{fontSize:18, fontWeight:700, color:'var(--text)', letterSpacing:'-.01em'}}
-                  onMouseEnter={e => e.currentTarget.style.color='var(--blue)'}
-                  onMouseLeave={e => e.currentTarget.style.color='var(--text)'}>
-                  {artist?.name || beat.artist}
-                </div>
+              <div style={{fontSize:34, fontWeight:700, color:'var(--text)', letterSpacing:'-.03em', lineHeight:1.1}}
+                onMouseEnter={e => e.currentTarget.style.color='var(--blue)'}
+                onMouseLeave={e => e.currentTarget.style.color='var(--text)'}>
+                {artist?.name || beat.artist}
               </div>
             </button>
 

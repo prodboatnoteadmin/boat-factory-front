@@ -3,7 +3,9 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
   const I = window.Icons;
   const beat = window.DATA.BEATS.find(b => b.id === beatId) || window.DATA.BEATS[0];
   const artist = window.DATA.ARTISTS.find(a => a.id === beat.artist);
-  const [notes, setNotes] = React.useState(beat.notes || '');
+  const [desc, setDesc] = React.useState(() => buildYouTubeDescription(beat));
+  const [copied, setCopied] = React.useState(false);
+  const descRef = React.useRef(null);
   const [coArtists, setCoArtists] = React.useState(beat.coArtists || []);
   const [coCollabs, setCoCollabs] = React.useState(beat.coCollabs || []);
   const [collab, setCollab] = React.useState(beat.collab || '');
@@ -15,6 +17,28 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
   const youtubeLink = savedManualYt || detectedYt;
   const queuePosition = queueIds.indexOf(beat.id);
   const inQueue = queuePosition !== -1;
+
+  // Rebuild the description when switching to another beat.
+  React.useEffect(() => {
+    setDesc(buildYouTubeDescription(beat));
+  }, [beat.id]);
+
+  // Grow the textarea so the whole description is visible (no scroll).
+  React.useEffect(() => {
+    const ta = descRef.current;
+    if (ta) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }
+  }, [desc]);
+
+  const copyDescription = async () => {
+    try {
+      await navigator.clipboard.writeText(desc);
+    } catch (e) {
+      const ta = descRef.current;
+      if (ta) { ta.focus(); ta.select(); document.execCommand('copy'); ta.setSelectionRange(0, 0); }
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div>
@@ -148,16 +172,27 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
         </window.Card>
       </div>
 
-      {/* Notes */}
-      <window.Card title="Noter" style={{marginBottom:24}}>
+      {/* YouTube description (from template) */}
+      <window.Card title="YouTube beskrivelse" style={{marginBottom:24}}
+        action={
+          <window.Btn kind="secondary" size="sm"
+            icon={copied ? <I.check /> : undefined}
+            onClick={copyDescription}>
+            {copied ? 'Kopieret!' : 'Copy'}
+          </window.Btn>
+        }
+      >
         <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Skriv noter om mix, hook, vocals, deadlines…"
+          ref={descRef}
+          value={desc}
+          onChange={(e) => setDesc(e.target.value)}
+          spellCheck={false}
           style={{
-            width:'100%', minHeight:120, padding:14,
+            width:'100%', minHeight:160, padding:14,
             background:'var(--bg-1)', border:'1px solid var(--border-strong)', borderRadius:6,
-            color:'var(--text)', fontSize:14, fontFamily:'inherit', resize:'vertical', outline:'none'
+            color:'var(--text)', fontSize:13, lineHeight:1.55,
+            fontFamily:'JetBrains Mono, monospace',
+            resize:'vertical', outline:'none', overflow:'hidden', display:'block'
           }}
         />
       </window.Card>
@@ -526,6 +561,52 @@ function ytVideoId(url) {
     if (m) return m[1];
   }
   return null;
+}
+
+// Build the YouTube description from the Boat Note template, filling
+// [ ] placeholders from the beat/artist. "[FREE]" stays literal.
+function buildYouTubeDescription(beat) {
+  const artist = window.DATA.ARTISTS.find(a => a.id === beat.artist);
+  const artistName = window.getArtistName(beat.artist) || '';
+  const norm = artistName.toLowerCase().replace(/[^a-z0-9]+/g, '');
+  const collab = (beat.collab || '').trim();
+  const year = beat.year || '';
+  const bpm = beat.bpm || '';
+  const key = beat.key || '';
+  const beatstars = beat.beatstars || '';
+  const songTitle = beat.title || '';
+  const creditLine = collab ? `(Prod. Boat Note x ${collab})` : '(Prod. Boat Note)';
+  const titleCollab = collab ? ` ${collab}` : '';
+
+  const tagBits = [];
+  if (artist) {
+    if (artist.youtubeKeywords) tagBits.push(artist.youtubeKeywords);
+    tagBits.push(...(artist.aTags || []), ...(artist.bTags || []), ...(artist.cTags || []));
+  }
+  const artisttag = tagBits.filter(Boolean).join(', ');
+
+  return `💰 Purchase/Download: ${beatstars} | Buy 2 Get 1 Free
+❗Add 3 beats to cart to activate discount
+Free for non profit use only. Must give credit ${creditLine}
+
+Bpm: ${bpm}
+Key: ${key}
+
+Instagram:   https://www.instagram.com/prodboatnote/
+Email:      prodboatnote@gmail.com
+Beat Store: https://boatnote.beatstars.com/
+
+This Beat is FREE for non-profit use ONLY. Any Use of my beats "Including leased beats" REQUIRE CREDIT IN THE TITLE (Prod. by Boat Note). There are NO Exceptions.
+The free version of this beat is NOT available for streaming services such as Spotify or Apple Music Etc.
+
+All feedback is appreciated. Like the video if you enjoyed.
+
+[FREE] ${artistName} Type Beat ${year} - '${songTitle}' | Prod. Boat Note${titleCollab}
+
+Ignore Tags
+${artisttag}
+
+#${norm}typebeat #${norm}typebeat${year} #${norm} #${norm}beats #free${norm}typebeat #free${norm}typebeats`;
 }
 
 window.ytVideoId = ytVideoId;

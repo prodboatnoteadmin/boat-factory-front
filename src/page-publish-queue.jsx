@@ -103,7 +103,7 @@ function QueuePanel({ title, subtitle, count, beats, isQueue, isPending, draggin
   const I = window.Icons;
 
   // Both panels share IDENTICAL columns. First col holds # for queue / "Tilføj til kø" button for draft.
-  const cols = '120px 26px minmax(180px, 2fr) minmax(140px, 1.2fr) 64px 64px 70px 76px 44px 48px';
+  const cols = '44px 26px minmax(180px, 2fr) minmax(140px, 1.2fr) 64px 64px 70px 76px 44px 48px';
 
   // Each row ≈ 50px tall (10px padding + 30px content + border).
   const ROW_HEIGHT = 50;

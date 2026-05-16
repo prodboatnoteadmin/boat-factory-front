@@ -528,4 +528,5 @@ function ytVideoId(url) {
   return null;
 }
 
+window.ytVideoId = ytVideoId;
 window.BeatDetailPage = BeatDetailPage;

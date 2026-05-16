@@ -6,6 +6,14 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
   const [sortBy, setSortBy] = React.useState('modified');
   const [sortDir, setSortDir] = React.useState('desc');
   const [selected, setSelected] = React.useState(new Set());
+  const [playBeat, setPlayBeat] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!playBeat) return;
+    const onKey = (e) => { if (e.key === 'Escape') setPlayBeat(null); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [playBeat]);
 
   const filtered = React.useMemo(() => {
     let arr = window.DATA.BEATS.filter(b => {
@@ -87,6 +95,8 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
         {filtered.map((b, idx) => {
           const checked = selected.has(b.id);
           const published = window.getLatestPublishDate(b.id);
+          const ytLink = window.getFirstYouTubeLink(b.id);
+          const ytVid = ytLink && window.ytVideoId ? window.ytVideoId(ytLink) : null;
           return (
             <div key={b.id} onClick={() => onOpenBeat(b.id)} style={{
               display:'grid',
@@ -105,11 +115,19 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
                 <CheckBox checked={checked} onChange={() => toggle(b.id)} />
               </div>
               <div style={{display:'flex', alignItems:'center', gap:12, minWidth:0}}>
-                <div style={{
-                  width:32, height:32, borderRadius:4, flexShrink:0,
-                  background:'linear-gradient(135deg, #2b2b2b, #161616)',
-                  display:'flex', alignItems:'center', justifyContent:'center'
-                }}>
+                <div
+                  onClick={ytVid ? (e) => { e.stopPropagation(); setPlayBeat({ vid: ytVid, title: b.title, artist: b.artist }); } : undefined}
+                  title={ytVid ? 'Afspil fra YouTube' : 'Ingen YouTube-video'}
+                  style={{
+                    width:32, height:32, borderRadius:4, flexShrink:0,
+                    background:'linear-gradient(135deg, #2b2b2b, #161616)',
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    color: ytVid ? '#fff' : 'var(--text-4)',
+                    cursor: ytVid ? 'pointer' : 'inherit'
+                  }}
+                  onMouseEnter={ytVid ? (e) => { e.currentTarget.style.background='linear-gradient(135deg, #3a2030, #1a0d12)'; e.currentTarget.style.color='#ff5252'; } : undefined}
+                  onMouseLeave={ytVid ? (e) => { e.currentTarget.style.background='linear-gradient(135deg, #2b2b2b, #161616)'; e.currentTarget.style.color='#fff'; } : undefined}
+                >
                   <I.play width={12} height={12} />
                 </div>
                 <div style={{fontWeight:600, fontSize:14, minWidth:0, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>{b.title}</div>
@@ -151,6 +169,42 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
             onAddToQueue && onAddToQueue([...selected]);
             setSelected(new Set());
           }}>Add to Queue</window.Btn>
+        </div>
+      )}
+
+      {playBeat && (
+        <div onClick={() => setPlayBeat(null)} style={{
+          position:'fixed', inset:0, zIndex:200, background:'rgba(0,0,0,.75)',
+          backdropFilter:'blur(4px)', display:'flex', alignItems:'center',
+          justifyContent:'center', padding:24
+        }}>
+          <div onClick={(e) => e.stopPropagation()} style={{
+            width:'100%', maxWidth:900, background:'var(--bg-2)',
+            border:'1px solid var(--border-strong)', borderRadius:12, overflow:'hidden',
+            boxShadow:'0 30px 80px rgba(0,0,0,.6)'
+          }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 18px', borderBottom:'1px solid var(--border)' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0 }}>
+                <span style={{ padding:'3px 8px', borderRadius:4, background:'rgba(232,72,85,.95)', color:'#fff', fontSize:10, fontWeight:800, letterSpacing:'.1em', flexShrink:0 }}>YOUTUBE</span>
+                <span style={{ fontSize:14, fontWeight:600, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{playBeat.title} · {window.getArtistName(playBeat.artist)}</span>
+              </div>
+              <button onClick={() => setPlayBeat(null)} title="Luk" style={{ padding:8, borderRadius:6, color:'var(--text-3)' }}
+                onMouseEnter={e=>{e.currentTarget.style.background='var(--bg-hover)';e.currentTarget.style.color='var(--text)'}}
+                onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='var(--text-3)'}}>
+                <I.x width={18} height={18} />
+              </button>
+            </div>
+            <div style={{ position:'relative', aspectRatio:'16/9', background:'#000' }}>
+              <iframe
+                src={`https://www.youtube.com/embed/${playBeat.vid}?autoplay=1`}
+                title={playBeat.title}
+                style={{ position:'absolute', inset:0, width:'100%', height:'100%', border:0 }}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

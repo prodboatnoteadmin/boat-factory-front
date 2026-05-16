@@ -165,14 +165,24 @@ window.DB = {
   async createBeat(form) {
     const id = uuid();
     const row = { id, ...beatFormToRow(form), created_at: nowIso() };
-    const { error } = await sb().from('beats').insert(row);
+    const { data, error } = await sb().from('beats').insert(row).select('id');
     throwIf(error, 'Kunne ikke oprette beat');
+    if (!data || !data.length) {
+      throw new Error('Beatet blev ikke gemt — tjek rettigheder (RLS) i Supabase.');
+    }
     return id;
   },
 
   async updateBeat(id, form) {
-    const { error } = await sb().from('beats').update(beatFormToRow(form)).eq('id', id);
+    const { data, error } = await sb()
+      .from('beats')
+      .update(beatFormToRow(form))
+      .eq('id', id)
+      .select('id');
     throwIf(error, 'Kunne ikke gemme beat');
+    if (!data || !data.length) {
+      throw new Error('Ændringen blev ikke gemt — tjek rettigheder (RLS) i Supabase.');
+    }
   },
 
   async deleteBeat(id) {
@@ -188,8 +198,15 @@ window.DB = {
   },
 
   async updateArtist(id, form) {
-    const { error } = await sb().from('artists').update(artistFormToRow(form)).eq('id', id);
+    const { data, error } = await sb()
+      .from('artists')
+      .update(artistFormToRow(form))
+      .eq('id', id)
+      .select('id');
     throwIf(error, 'Kunne ikke gemme artist');
+    if (!data || !data.length) {
+      throw new Error('Ændringen blev ikke gemt — tjek rettigheder (RLS) i Supabase.');
+    }
   },
 
   async updateArtistKeywords(id, keywords) {

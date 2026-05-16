@@ -117,7 +117,10 @@ function Root() {
     }} />;
   }
   if (dataState !== 'ready') return <Splash text="Henter dine beats…" />;
-  return <window.App key={nonce} />;
+  // Pass the data version as a prop (NOT key) so a refresh re-renders
+  // with fresh data without unmounting App — keeps you on the same
+  // page after a save instead of bouncing to the Beats list.
+  return <window.App dataVersion={nonce} />;
 }
 
 createRoot(document.getElementById('root')).render(<Root />);

@@ -267,20 +267,49 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
       {/* Read-only details */}
       <window.Card title="Detaljer" style={{marginBottom:24}}>
         <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-          {[
-            ['Oprettelsestidspunkt', beat.created ? new Date(beat.created).toLocaleString('da-DK') : '—'],
-            ['Filnavn', beat.fileName || '—'],
-            ['Foldersti', beat.filePath || '—'],
-            ['BeatStars link', beat.beatstars || '—'],
-            ['YouTube link', beat.youtube || '—'],
-          ].map(([label, value]) => (
-            <div key={label}>
-              <div style={{ fontSize:11, color:'var(--text-3)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:4, fontWeight:600 }}>{label}</div>
-              <div style={{ fontSize:13, color:'var(--text-2)', fontFamily:'JetBrains Mono, monospace', wordBreak:'break-all' }}>{value}</div>
-            </div>
-          ))}
+          <DetailRow label="Oprettelsestidspunkt" value={beat.created ? new Date(beat.created).toLocaleString('da-DK') : '—'} />
+          <DetailRow label="Filnavn" value={beat.fileName || '—'} copyable />
+          <DetailRow label="Foldersti" value={beat.filePath || '—'} copyable />
+          <DetailRow label="BeatStars link" value={beat.beatstars || '—'} copyable link />
+          <DetailRow label="YouTube link" value={beat.youtube || '—'} copyable link />
         </div>
       </window.Card>
+    </div>
+  );
+}
+
+function DetailRow({ label, value, copyable, link }) {
+  const I = window.Icons;
+  const [copied, setCopied] = React.useState(false);
+  const has = value && value !== '—';
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(value); } catch (e) { /* ignore */ }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  const valStyle = { fontSize:13, fontFamily:'JetBrains Mono, monospace', wordBreak:'break-all', flex:1, minWidth:0 };
+  return (
+    <div>
+      <div style={{ fontSize:11, color:'var(--text-3)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:4, fontWeight:600 }}>{label}</div>
+      <div style={{ display:'flex', alignItems:'flex-start', gap:8 }}>
+        {link && has ? (
+          <a href={value} target="_blank" rel="noopener noreferrer" style={{ ...valStyle, color:'var(--blue)' }}>{value}</a>
+        ) : (
+          <span style={{ ...valStyle, color:'var(--text-2)' }}>{value}</span>
+        )}
+        {copyable && has && (
+          <button onClick={copy} title={copied ? 'Kopieret!' : 'Kopiér'} style={{
+            flexShrink:0, width:26, height:26, borderRadius:5,
+            color: copied ? 'var(--green)' : 'var(--text-3)',
+            border:'1px solid var(--border-strong)', background:'transparent',
+            display:'inline-flex', alignItems:'center', justifyContent:'center', cursor:'pointer'
+          }}
+            onMouseEnter={e=>{ if(!copied){ e.currentTarget.style.background='var(--bg-hover)'; e.currentTarget.style.color='var(--text)'; } }}
+            onMouseLeave={e=>{ if(!copied){ e.currentTarget.style.background='transparent'; e.currentTarget.style.color='var(--text-3)'; } }}>
+            {copied ? <I.check width={13} height={13} /> : <I.copy width={13} height={13} />}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

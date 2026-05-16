@@ -63,7 +63,7 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
       {/* Filter bar */}
       <div style={{ display:'flex', gap:10, marginBottom:18, alignItems:'center', flexWrap:'wrap' }}>
         <div style={{flex:'1 1 300px', minWidth:240}}>
-          <window.TextInput value={search} onChange={setSearch} placeholder="Søg songtitle…" icon={<I.search />} fullWidth />
+          <window.TextInput value={search} onChange={setSearch} placeholder="Søg efter sangnavn" icon={<I.search />} fullWidth />
         </div>
         <window.Select value={artistFilter} onChange={setArtistFilter} options={[
           { value:'', label:'Alle artists' },

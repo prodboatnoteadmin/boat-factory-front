@@ -224,42 +224,52 @@ window.DB = {
     throwIf(error, 'Kunne ikke gemme tags');
   },
 
-  // Persist the publish queue in a SINGLE batched request (the queue can
-  // hold hundreds of beats — one update per beat would be far too slow
-  // and effectively never complete). A beat in the queue is, by
-  // definition, pending publication, so we also force status='pending'
-  // (otherwise it gets filtered out of the queue on the next load).
+  // Persist the publish queue.
+  //
+  // We must NOT upsert: upsert tries to INSERT rows whose id doesn't
+  // match, which fails the NOT NULL constraint on songtitle. Plain
+  // UPDATE only ever touches the columns we send, so it's safe.
+  //
+  // To stay fast we only UPDATE the beats whose position/status
+  // actually changed, and run those updates in parallel chunks. A beat
+  // in the queue is, by definition, pending publication, so we force
+  // status='pending' (otherwise it's filtered out of the queue on the
+  // next load).
   async persistQueue(queueIds) {
     const ids = Array.isArray(queueIds) ? queueIds : [];
     const stamp = nowIso();
 
-    // Beats that currently hold a queue position (to clear the ones
-    // that are no longer in the queue).
     const { data: current, error: selErr } = await sb()
       .from('beats')
-      .select('id')
+      .select('id, queue_position, status')
       .not('queue_position', 'is', null);
     throwIf(selErr, 'Kunne ikke læse køen');
+    const curMap = new Map((current || []).map(r => [r.id, r]));
 
-    if (ids.length) {
-      const rows = ids.map((id, i) => ({
-        id,
-        queue_position: i + 1,
-        status: 'pending',
-        updated_at: stamp,
-      }));
-      const { data, error } = await sb()
-        .from('beats')
-        .upsert(rows, { onConflict: 'id' })
-        .select('id');
-      throwIf(error, 'Kunne ikke gemme køen');
-      if (!data || data.length !== rows.length) {
-        throw new Error('Køen blev ikke gemt korrekt — tjek rettigheder (RLS) i Supabase.');
+    // Only the beats whose position or status differs need an update.
+    const ops = [];
+    ids.forEach((id, i) => {
+      const pos = i + 1;
+      const c = curMap.get(id);
+      if (!c || c.queue_position !== pos || c.status !== 'pending') {
+        ops.push(
+          sb().from('beats')
+            .update({ queue_position: pos, status: 'pending', updated_at: stamp })
+            .eq('id', id)
+        );
       }
-    }
+    });
 
     const queueSet = new Set(ids);
     const removed = (current || []).map(r => r.id).filter(id => !queueSet.has(id));
+
+    // Run position/status updates in parallel chunks.
+    for (let i = 0; i < ops.length; i += 25) {
+      const results = await Promise.all(ops.slice(i, i + 25));
+      for (const r of results) throwIf(r.error, 'Kunne ikke gemme køen');
+    }
+
+    // Clear the position for beats that left the queue (batched).
     for (let i = 0; i < removed.length; i += 100) {
       const chunk = removed.slice(i, i + 100);
       const { error } = await sb()

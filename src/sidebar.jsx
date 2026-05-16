@@ -23,7 +23,6 @@ function Sidebar({ current, onNav, onLogout }) {
         }}>B</div>
         <div style={{display:'flex', flexDirection:'column', lineHeight:1.1}}>
           <span style={{fontWeight:700, fontSize:17, letterSpacing:'-.01em'}}>Beat Manager</span>
-          <span style={{fontSize:11, color:'var(--text-3)', letterSpacing:'.04em', marginTop:2}}>Boat Note · Admin</span>
         </div>
       </div>
 

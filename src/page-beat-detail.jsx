@@ -87,7 +87,7 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
             {coArtists.length > 0 && (
               <div style={{flexShrink:0}}>
                 <div style={{fontSize:11, color:'var(--text-3)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:2, fontWeight:600}}>Co-Artists</div>
-                <div style={{fontSize:18, fontWeight:700, color:'var(--text)', letterSpacing:'-.01em'}}>{coArtists.join(', ')}</div>
+                <div style={{fontSize:18, fontWeight:400, color:'var(--text)', letterSpacing:'-.01em'}}>{coArtists.join(', ')}</div>
               </div>
             )}
 

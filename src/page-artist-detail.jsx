@@ -9,6 +9,8 @@ function ArtistDetailPage({ artistId, onBack, onNav, onOpenBeat, onEditArtist })
   const [cTags, setCTags] = React.useState(artist.cTags || []);
   const [hashtags, setHashtags] = React.useState(artist.artistHashtags || []);
   const [ytKw, setYtKw] = React.useState(artist.youtubeKeywords || '');
+  const [savingKw, setSavingKw] = React.useState(false);
+  const [kwSaved, setKwSaved] = React.useState(false);
   const ytKwRef = React.useRef(null);
 
   // Grow the keywords field so the whole text is visible.
@@ -16,6 +18,22 @@ function ArtistDetailPage({ artistId, onBack, onNav, onOpenBeat, onEditArtist })
     const ta = ytKwRef.current;
     if (ta) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }
   }, [ytKw]);
+
+  const kwDirty = ytKw !== (artist.youtubeKeywords || '');
+  const saveKeywords = async () => {
+    if (savingKw) return;
+    setSavingKw(true);
+    try {
+      await window.DB.updateArtistKeywords(artist.id, ytKw);
+      artist.youtubeKeywords = ytKw; // keep in-memory data in sync
+      setKwSaved(true);
+      setTimeout(() => setKwSaved(false), 2000);
+    } catch (e) {
+      alert('Kunne ikke gemme YouTube keywords: ' + e.message);
+    } finally {
+      setSavingKw(false);
+    }
+  };
 
   return (
     <div>
@@ -96,7 +114,16 @@ function ArtistDetailPage({ artistId, onBack, onNav, onOpenBeat, onEditArtist })
       </div>
 
       {/* YouTube keywords — full width */}
-      <window.Card title="YouTube Keywords" style={{marginBottom:16}}>
+      <window.Card title="YouTube Keywords" style={{marginBottom:16}}
+        action={
+          <window.Btn kind="blue" size="sm"
+            icon={kwSaved ? <I.check /> : undefined}
+            disabled={savingKw || (!kwDirty && !kwSaved)}
+            onClick={saveKeywords}>
+            {kwSaved ? 'Gemt!' : (savingKw ? 'Gemmer…' : 'Gem')}
+          </window.Btn>
+        }
+      >
         <div style={{fontSize:12, color:'var(--text-3)', marginTop:-6, marginBottom:14}}>Komma-separeret. Tilføjes til alle uploads under denne artist.</div>
         <textarea ref={ytKwRef} value={ytKw} onChange={e => setYtKw(e.target.value)} spellCheck={false} placeholder="gunna type beat, dripseason, melodic trap, atlanta…" style={{
           width:'100%', minHeight:120, padding:14,

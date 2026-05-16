@@ -192,6 +192,14 @@ window.DB = {
     throwIf(error, 'Kunne ikke gemme artist');
   },
 
+  async updateArtistKeywords(id, keywords) {
+    const { error } = await sb()
+      .from('artists')
+      .update({ youtube_keywords: keywords || null })
+      .eq('id', id);
+    throwIf(error, 'Kunne ikke gemme YouTube keywords');
+  },
+
   // Persist the publish queue: queueIds in order, pendingIds get no position.
   async persistQueue(queueIds, pendingIds) {
     const updates = [];

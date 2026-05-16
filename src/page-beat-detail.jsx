@@ -159,15 +159,30 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
         <div style={{ display:'flex', flexDirection:'column', gap:24 }}>
           <window.Card title="Links">
             <div style={{ display:'flex', flexDirection:'column', gap:10, alignItems:'flex-start' }}>
-              {beat.beatstars ? (
-                <a href={beat.beatstars} target="_blank" rel="noopener noreferrer" title="Åbn på BeatStars" style={logoBtn(false)}>
-                  <I.bs width={16} height={16} style={{ color:'#E5384F' }} /> BeatStars <I.ext width={12} height={12} />
-                </a>
-              ) : (
-                <span title="Intet BeatStars-link" style={logoBtn(true)}>
-                  <I.bs width={16} height={16} /> BeatStars
-                </span>
-              )}
+              <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
+                {beat.beatstars ? (
+                  <a href={beat.beatstars} target="_blank" rel="noopener noreferrer" title="Åbn på BeatStars" style={logoBtn(false)}>
+                    <I.bs width={16} height={16} style={{ color:'#E5384F' }} /> BeatStars <I.ext width={12} height={12} />
+                  </a>
+                ) : (
+                  <span title="Intet BeatStars-link" style={logoBtn(true)}>
+                    <I.bs width={16} height={16} /> BeatStars
+                  </span>
+                )}
+                {(() => {
+                  const p = beat.filePath;
+                  const url = p ? 'https://www.dropbox.com/home' + encodeURI(p.startsWith('/') ? p : '/' + p) : null;
+                  return url ? (
+                    <a href={url} target="_blank" rel="noopener noreferrer" title="Åbn i Dropbox" style={logoBtn(false)}>
+                      <I.dbx width={16} height={16} style={{ color:'#0061FF' }} /> Dropbox <I.ext width={12} height={12} />
+                    </a>
+                  ) : (
+                    <span title="Ingen foldersti" style={logoBtn(true)}>
+                      <I.dbx width={16} height={16} /> Dropbox
+                    </span>
+                  );
+                })()}
+              </div>
               <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
                 {youtubeLink ? (
                   <a href={youtubeLink} target="_blank" rel="noopener noreferrer" title="Åbn på YouTube" style={logoBtn(false)}>

@@ -167,6 +167,7 @@ function ChipInput({ values, onChange, placeholder }) {
           if (e.key === 'Enter' && text.trim()) { e.preventDefault(); onChange([...values, text.trim()]); setText(''); }
           if (e.key === 'Backspace' && !text && values.length) onChange(values.slice(0, -1));
         }}
+        onBlur={() => { if (text.trim()) { onChange([...values, text.trim()]); setText(''); } }}
         style={{ flex:1, minWidth:120, background:'transparent', border:'none', outline:'none', color:'var(--text)', fontSize:14, padding:'4px 6px' }} />
     </div>
   );

@@ -6,7 +6,7 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
   const [desc, setDesc] = React.useState(() => buildYouTubeDescription(beat));
   const [copied, setCopied] = React.useState(false);
   const descRef = React.useRef(null);
-  const [coArtists, setCoArtists] = React.useState(beat.coArtists || []);
+  const coArtists = beat.coArtists || []; // read-only here; edit via the beat form
   const [coCollabs, setCoCollabs] = React.useState(beat.coCollabs || []);
   const [collab, setCollab] = React.useState(beat.collab || '');
   const [manualYt, setManualYt] = React.useState('');
@@ -76,7 +76,7 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
           {coArtists.length > 0 && (
             <div style={{marginTop:14, display:'flex', alignItems:'center', gap:8, flexWrap:'wrap'}}>
               <span style={{fontSize:11, color:'var(--text-3)', letterSpacing:'.06em', textTransform:'uppercase', fontWeight:600}}>Co-artists:</span>
-              {coArtists.map(n => <window.Chip key={n} onRemove={() => setCoArtists(coArtists.filter(x => x !== n))}>{n}</window.Chip>)}
+              {coArtists.map(n => <window.Chip key={n}>{n}</window.Chip>)}
             </div>
           )}
         </div>

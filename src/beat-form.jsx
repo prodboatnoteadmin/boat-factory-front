@@ -63,10 +63,8 @@ function BeatFormModal({ open, beatId, onClose, onSave }) {
               <window.TextInput value={form.title} onChange={(v) => set('title', v)} placeholder="Skriv navnet på beatet" fullWidth />
             </Field>
             <Field label="Artist" required>
-              <window.Select value={form.artist} onChange={(v) => set('artist', v)} options={[
-                ...window.DATA.ARTISTS.map(a => ({ value:a.id, label:a.name })),
-                { value:'__new', label:'+ Opret ny artist' },
-              ]} />
+              <window.Select value={form.artist} onChange={(v) => set('artist', v)}
+                options={window.DATA.ARTISTS.map(a => ({ value:a.id, label:a.name }))} />
             </Field>
 
             <Field label="Co-Artists">

@@ -1,0 +1,166 @@
+// Beat form modal (create / edit)
+function BeatFormModal({ open, beatId, onClose, onSave }) {
+  const I = window.Icons;
+  const existing = beatId ? window.DATA.BEATS.find(b => b.id === beatId) : null;
+
+  const [form, setForm] = React.useState({
+    title: existing?.title || '',
+    artist: existing?.artist || '',
+    coArtists: existing?.coArtists || [],
+    year: existing?.year || new Date().getFullYear(),
+    bpm: existing?.bpm || '',
+    key: existing?.key || '',
+    collab: existing?.collab || '',
+    coCollabs: existing?.coCollabs || [],
+    category: existing?.category || '',
+    status: existing?.status || 'draft',
+    beatstars: existing?.beatstars || '',
+    youtube: existing?.youtube || '',
+    fileName: existing?.fileName || '',
+    filePath: existing?.filePath || '',
+    notes: existing?.notes || '',
+  });
+
+  React.useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  if (!open) return null;
+
+  const set = (k, v) => setForm({ ...form, [k]: v });
+
+  return (
+    <div style={{
+      position:'fixed', inset:0, zIndex:100, display:'flex',
+      alignItems:'flex-start', justifyContent:'center',
+      background:'rgba(0,0,0,.65)', backdropFilter:'blur(4px)', padding:'40px 20px',
+      overflow:'auto'
+    }} onClick={onClose}>
+      <div style={{
+        background:'var(--bg-2)', border:'1px solid var(--border-strong)', borderRadius:12,
+        width:'100%', maxWidth:760, padding:0, overflow:'hidden',
+        boxShadow:'0 30px 80px rgba(0,0,0,.6)'
+      }} onClick={(e) => e.stopPropagation()}>
+        {/* header */}
+        <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 24px', borderBottom:'1px solid var(--border)'}}>
+          <div>
+            <h2 style={{margin:0, fontSize:20, fontWeight:700, letterSpacing:'-.02em'}}>{existing ? 'Rediger beat' : 'Nyt beat'}</h2>
+            <p style={{margin:'4px 0 0', fontSize:13, color:'var(--text-3)'}}>{existing ? `Ændringer gemmes på "${existing.title}"` : 'Tilføj et nyt beat til biblioteket'}</p>
+          </div>
+          <button onClick={onClose} style={{padding:8, borderRadius:6, color:'var(--text-3)'}}
+            onMouseEnter={e=>{e.currentTarget.style.background='var(--bg-hover)';e.currentTarget.style.color='var(--text)'}}
+            onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='var(--text-3)'}}>
+            <I.x width={18} height={18} />
+          </button>
+        </div>
+
+        {/* body */}
+        <div style={{padding:'24px', maxHeight:'70vh', overflow:'auto'}}>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
+            <Field label="Songtitle" required full>
+              <window.TextInput value={form.title} onChange={(v) => set('title', v)} placeholder="Got My Way" fullWidth />
+            </Field>
+            <Field label="Artist" required>
+              <window.Select value={form.artist} onChange={(v) => set('artist', v)} placeholder="Vælg artist" options={[
+                ...window.DATA.ARTISTS.map(a => ({ value:a.id, label:a.name })),
+                { value:'__new', label:'+ Opret ny artist' },
+              ]} />
+            </Field>
+            <Field label="Year">
+              <window.TextInput value={form.year} onChange={(v) => set('year', v)} placeholder="2026" fullWidth />
+            </Field>
+            <Field label="BPM">
+              <window.TextInput value={form.bpm} onChange={(v) => set('bpm', v)} placeholder="140" type="number" fullWidth />
+            </Field>
+            <Field label="Key">
+              <window.Select value={form.key} onChange={(v) => set('key', v)} placeholder="Vælg key" options={window.DATA.KEYS} />
+            </Field>
+
+            <Field label="Co-Artists" full>
+              <ChipInput values={form.coArtists} onChange={(v) => set('coArtists', v)} placeholder="Skriv navn + Enter" />
+            </Field>
+
+            <Field label="Collab">
+              <window.TextInput value={form.collab} onChange={(v) => set('collab', v)} placeholder="theboycasa" fullWidth />
+            </Field>
+            <Field label="Co-Collabs">
+              <ChipInput values={form.coCollabs} onChange={(v) => set('coCollabs', v)} placeholder="Skriv navn + Enter" />
+            </Field>
+
+            <Field label="BeatStars link" required full>
+              <window.TextInput value={form.beatstars} onChange={(v) => set('beatstars', v)} placeholder="https://beatstars.com/…" fullWidth />
+            </Field>
+            <Field label="File Name" required>
+              <window.TextInput value={form.fileName} onChange={(v) => set('fileName', v)} placeholder="GotMyWay_Gunna_131_Cmin.wav" fullWidth />
+            </Field>
+            <Field label="Collab folder">
+              <CollabFolderInput value={form.filePath} onChange={(v) => set('filePath', v)} />
+            </Field>
+          </div>
+        </div>
+
+        {/* footer */}
+        <div style={{display:'flex', justifyContent:'flex-end', gap:10, padding:'16px 24px', borderTop:'1px solid var(--border)', background:'var(--bg-1)'}}>
+          <window.Btn kind="secondary" onClick={onClose}>Annuller</window.Btn>
+          <window.Btn kind="blue" icon={<I.check />}
+            disabled={!form.title.trim() || !form.artist || !form.beatstars.trim() || !form.fileName.trim()}
+            onClick={() => onSave(form)}>Gem</window.Btn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CollabFolderInput({ value, onChange }) {
+  const [focus, setFocus] = React.useState(false);
+  return (
+    <div style={{
+      display:'flex', alignItems:'center', gap:2, padding:'0 4px 0 12px',
+      background:'var(--bg-1)', border:`1px solid ${focus ? 'var(--blue)' : 'var(--border-strong)'}`,
+      borderRadius:6, height:38, transition:'border-color .15s', overflow:'hidden'
+    }}>
+      <span style={{ fontSize:14, color:'var(--text-2)', whiteSpace:'nowrap', fontFamily:'JetBrains Mono, monospace' }}>@boatnote x @</span>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onFocus={() => setFocus(true)}
+        onBlur={() => setFocus(false)}
+        placeholder="Indtast Collab"
+        style={{ flex:1, background:'transparent', border:'none', outline:'none', color:'var(--text)', fontSize:14, minWidth:80, padding:'0 2px', fontFamily:'JetBrains Mono, monospace' }} />
+      <span style={{ fontSize:14, color:'var(--text-2)', whiteSpace:'nowrap', fontFamily:'JetBrains Mono, monospace', paddingRight:8 }}>"Beats</span>
+    </div>
+  );
+}
+
+function Field({ label, required, full, children }) {
+  return (
+    <div style={{ gridColumn: full ? '1 / -1' : 'auto' }}>
+      <label style={{display:'block', fontSize:12, color:'var(--text-3)', marginBottom:6, fontWeight:600, letterSpacing:'.02em'}}>
+        {label}{required && <span style={{color:'var(--red)'}}> *</span>}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+function ChipInput({ values, onChange, placeholder }) {
+  const [text, setText] = React.useState('');
+  return (
+    <div style={{
+      display:'flex', flexWrap:'wrap', gap:6, padding:6,
+      background:'var(--bg-1)', border:'1px solid var(--border-strong)', borderRadius:6, minHeight:38
+    }}>
+      {values.map(v => <window.Chip key={v} onRemove={() => onChange(values.filter(x => x !== v))}>{v}</window.Chip>)}
+      <input value={text} onChange={(e) => setText(e.target.value)} placeholder={placeholder}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && text.trim()) { e.preventDefault(); onChange([...values, text.trim()]); setText(''); }
+          if (e.key === 'Backspace' && !text && values.length) onChange(values.slice(0, -1));
+        }}
+        style={{ flex:1, minWidth:120, background:'transparent', border:'none', outline:'none', color:'var(--text)', fontSize:14, padding:'4px 6px' }} />
+    </div>
+  );
+}
+
+window.BeatFormModal = BeatFormModal;

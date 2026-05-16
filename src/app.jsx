@@ -28,6 +28,11 @@ function App() {
       .catch(e => alert('Kunne ikke gemme køen: ' + e.message));
   }, [queueIds, pendingIds]);
 
+  // Always start a newly opened view at the top.
+  useEffectApp(() => {
+    window.scrollTo(0, 0);
+  }, [route.page, route.beatId, route.artistId]);
+
   // Toast for bulk add
   const [toast, setToast] = useStateApp(null);
   const showToast = (msg) => {

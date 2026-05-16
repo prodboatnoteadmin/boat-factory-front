@@ -78,7 +78,11 @@ function DataErrorScreen({ error, onRetry }) {
 }
 
 function Root() {
-  const [session, setSession] = React.useState(undefined); // undefined = checking
+  // Track the logged-in USER, not the raw session. Supabase fires
+  // onAuthStateChange on token refresh (e.g. every time you come back
+  // to the tab after opening a link); reacting to that would reload
+  // and reset the view. We only care about real login/logout.
+  const [authUserId, setAuthUserId] = React.useState(undefined); // undefined=checking, null=logged out, string=user id
   const [dataState, setDataState] = React.useState('idle'); // idle | loading | ready | error
   const [dataError, setDataError] = React.useState(null);
   const [nonce, setNonce] = React.useState(0);
@@ -89,27 +93,32 @@ function Root() {
 
   React.useEffect(() => {
     let active = true;
-    supabase.auth.getSession().then(({ data }) => { if (active) setSession(data.session ?? null); });
+    supabase.auth.getSession().then(({ data }) => {
+      if (active) setAuthUserId(data.session?.user?.id ?? null);
+    });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s ?? null);
+      const uid = s?.user?.id ?? null;
+      // Only change state on a real user change (login/logout) — not
+      // on token refresh / tab-focus events.
+      setAuthUserId(prev => (prev === uid ? prev : uid));
     });
     return () => { active = false; sub.subscription.unsubscribe(); };
   }, []);
 
   React.useEffect(() => {
-    if (session) {
+    if (authUserId) {
       setDataState('loading');
       window.loadData()
         .then(() => setDataState('ready'))
         .catch((e) => { setDataError(e); setDataState('error'); });
-    } else {
+    } else if (authUserId === null) {
       setDataState('idle');
     }
-  }, [session]);
+  }, [authUserId]);
 
   if (!supabaseConfigured) return <ConfigScreen />;
-  if (session === undefined) return <Splash text="Indlæser…" />;
-  if (!session) return <window.LoginPage onLogin={() => {}} />;
+  if (authUserId === undefined) return <Splash text="Indlæser…" />;
+  if (!authUserId) return <window.LoginPage onLogin={() => {}} />;
   if (dataState === 'error') {
     return <DataErrorScreen error={dataError} onRetry={() => {
       setDataState('loading');

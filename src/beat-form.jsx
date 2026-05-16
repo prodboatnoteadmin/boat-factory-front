@@ -17,7 +17,7 @@ function BeatFormModal({ open, beatId, onClose, onSave }) {
     beatstars: b?.beatstars || '',
     youtube: b?.youtube || '',
     fileName: b?.fileName || '',
-    filePath: b?.filePath || '',
+    filePath: collabFolderFromPath(b?.filePath), // just the collab folder name
     notes: b?.notes || '',
   });
 
@@ -98,13 +98,13 @@ function BeatFormModal({ open, beatId, onClose, onSave }) {
             </Field>
 
             <Field label="Collab folder">
-              <window.TextInput value={form.filePath} onChange={(v) => set('filePath', v)} placeholder="@Boatnote x @navn Beats/Titel …" fullWidth />
+              <CollabFolderInput value={form.filePath} onChange={(v) => set('filePath', v)} />
             </Field>
             <Field label="Beatstars link" required>
               <window.TextInput value={form.beatstars} onChange={(v) => set('beatstars', v)} placeholder="Skriv linket til beatet på Beatstars" fullWidth />
             </Field>
 
-            <Field label="Filnavn" required>
+            <Field label="Filnavn" required full>
               <window.TextInput value={form.fileName} onChange={(v) => set('fileName', v)} placeholder="Skriv det præcise filnavn (fx. beat.mp3)" fullWidth />
             </Field>
           </div>
@@ -141,6 +141,13 @@ function CollabFolderInput({ value, onChange }) {
       <span style={{ fontSize:14, color:'var(--text-3)', whiteSpace:'nowrap', fontFamily:'JetBrains Mono, monospace', paddingRight:8 }}>{' Beats'}</span>
     </div>
   );
+}
+
+// Pull just the collab-folder name back out of a stored file path.
+function collabFolderFromPath(p) {
+  if (!p) return '';
+  const m = String(p).match(/\/Collab Beats\/@[Bb]oatnote x @(.+?) Beats\//);
+  return m ? m[1] : '';
 }
 
 function Field({ label, required, full, children }) {

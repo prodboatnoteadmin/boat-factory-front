@@ -82,6 +82,19 @@ const intOrNull = (v) => {
   return Number.isNaN(n) ? null : n;
 };
 
+// Build the full file path from the static folder structure + the
+// collab-folder name (form.filePath holds just the name) + the file
+// name. With a collab name it goes in the Collab Beats subfolder,
+// otherwise straight into the beats folder.
+const buildFilePath = (form) => {
+  const fileName = (form.fileName || '').trim();
+  if (!fileName) return null;
+  const collab = String(form.filePath || '').trim().replace(/^@+/, '');
+  return collab
+    ? `/Fl Studio Beats/Beats/Collab Beats/@boatnote x @${collab} Beats/${fileName}`
+    : `/Fl Studio Beats/Beats/Beats/${fileName}`;
+};
+
 const beatFormToRow = (form) => ({
   songtitle: (form.title || '').trim(),
   artist_id: form.artist || null,
@@ -96,7 +109,7 @@ const beatFormToRow = (form) => ({
   youtube_link: form.youtube || null,
   beatstars_link: form.beatstars || null,
   file_name: form.fileName || null,
-  file_path: form.filePath || null,
+  file_path: buildFilePath(form),
   notes: form.notes || null,
   updated_at: nowIso(),
 });

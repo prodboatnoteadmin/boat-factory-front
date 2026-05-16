@@ -41,13 +41,6 @@ function ArtistDetailPage({ artistId, onBack, onNav, onOpenBeat, onEditArtist })
             <div style={{fontSize:14, color:'var(--text-3)'}}>{artist.beatsCount} beats · {artistBeats.filter(b => window.getLatestPublishDate(b.id)).length} udgivet</div>
           </div>
         </div>
-        <span style={{
-          display:'inline-flex', alignItems:'center', gap:6, padding:'5px 10px',
-          background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:6,
-          fontSize:11, color:'var(--text-3)', letterSpacing:'.06em', textTransform:'uppercase'
-        }}>
-          <I.eye width={12} height={12} /> Stamdata redigeres via menu
-        </span>
         <window.DropdownMenu items={[
           { label:'Rediger stamdata', icon:<I.edit />, onClick: () => onEditArtist && onEditArtist(artist.id) },
         ]} />

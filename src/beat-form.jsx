@@ -98,7 +98,7 @@ function BeatFormModal({ open, beatId, onClose, onSave }) {
             </Field>
 
             <Field label="Collab folder">
-              <CollabFolderInput value={form.filePath} onChange={(v) => set('filePath', v)} />
+              <window.TextInput value={form.filePath} onChange={(v) => set('filePath', v)} placeholder="@Boatnote x @navn Beats/Titel …" fullWidth />
             </Field>
             <Field label="Beatstars link" required>
               <window.TextInput value={form.beatstars} onChange={(v) => set('beatstars', v)} placeholder="Skriv linket til beatet på Beatstars" fullWidth />

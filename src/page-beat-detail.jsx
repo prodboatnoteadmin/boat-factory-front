@@ -7,7 +7,6 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
   const [coArtists, setCoArtists] = React.useState(beat.coArtists || []);
   const [coCollabs, setCoCollabs] = React.useState(beat.coCollabs || []);
   const [collab, setCollab] = React.useState(beat.collab || '');
-  const [playing, setPlaying] = React.useState(false);
   const [manualYt, setManualYt] = React.useState('');
   const [savedManualYt, setSavedManualYt] = React.useState(null);
 
@@ -68,62 +67,56 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
         </div>
       </div>
 
-      {/* YouTube embed — always shown; placeholder if no link from a job yet */}
+      {/* YouTube — real embed for beats that have a YouTube link */}
       <div style={{ marginBottom:28 }}>
-        {youtubeLink ? (
-          <div style={{
-            position:'relative', borderRadius:10, overflow:'hidden',
-            aspectRatio:'16/9', background:'#0a0a0a',
-            border:'1px solid var(--border)',
-          }}>
-            <div style={{
-              position:'absolute', inset:0,
-              background:`linear-gradient(135deg, #2b1f3a 0%, #0e0a1a 60%, #050308 100%)`,
-            }}></div>
-            <div style={{position:'absolute', inset:0,
-              background:`radial-gradient(ellipse 50% 30% at 25% 30%, rgba(232,72,85,.35) 0%, transparent 70%),
-                          radial-gradient(ellipse 40% 30% at 75% 40%, rgba(74,144,217,.35) 0%, transparent 70%)`,
-              mixBlendMode:'screen'
-            }}></div>
-            <div style={{
-              position:'absolute', bottom:0, left:0, right:0, height:'40%',
-              display:'flex', alignItems:'flex-end', justifyContent:'space-between', padding:'0 8%', opacity:.7
-            }}>
-              {Array.from({length:60}).map((_,i)=>{
-                const h = 8 + 92 * Math.abs(Math.sin(i*0.55) * Math.cos(i*0.27));
-                return <div key={i} style={{ width:'1%', background:'linear-gradient(to top, #fff 0%, rgba(255,255,255,.3) 100%)', height:`${h}%`, borderRadius:1 }}></div>;
-              })}
-            </div>
-            <button onClick={() => setPlaying(p => !p)} style={{
-              position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center',
-              background:'transparent'
-            }}>
-              <div style={{
-                width:84, height:84, borderRadius:'50%', background:'rgba(255,255,255,.96)', color:'#0d0d0d',
-                display:'flex', alignItems:'center', justifyContent:'center',
-                boxShadow:'0 16px 60px rgba(0,0,0,.6)'
-              }}>
-                {playing ? <I.pause width={28} height={28} /> : <I.play width={28} height={28} />}
-              </div>
-            </button>
-            <div style={{
-              position:'absolute', top:14, left:16, right:16, display:'flex', alignItems:'center', justifyContent:'space-between'
-            }}>
-              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+        {(() => {
+          const vid = youtubeLink ? ytVideoId(youtubeLink) : null;
+          if (vid) {
+            return (
+              <div>
                 <div style={{
-                  padding:'4px 10px', borderRadius:4, background:'rgba(232,72,85,.95)',
-                  fontSize:10, fontWeight:800, letterSpacing:'.1em'
-                }}>YOUTUBE</div>
-                <span style={{ fontSize:12, color:'rgba(255,255,255,.7)' }}>{beat.title} · {window.getArtistName(beat.artist)} type beat</span>
+                  position:'relative', borderRadius:10, overflow:'hidden',
+                  aspectRatio:'16/9', background:'#000',
+                  border:'1px solid var(--border)',
+                }}>
+                  <iframe
+                    src={`https://www.youtube.com/embed/${vid}`}
+                    title={`${beat.title} · ${window.getArtistName(beat.artist)}`}
+                    style={{ position:'absolute', inset:0, width:'100%', height:'100%', border:0 }}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    referrerPolicy="strict-origin-when-cross-origin"
+                  />
+                </div>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, marginTop:10 }}>
+                  <span style={{ display:'inline-flex', alignItems:'center', gap:8, fontSize:12, color:'var(--text-3)', minWidth:0 }}>
+                    <span style={{ padding:'3px 8px', borderRadius:4, background:'rgba(232,72,85,.95)', color:'#fff', fontSize:10, fontWeight:800, letterSpacing:'.1em', flexShrink:0 }}>YOUTUBE</span>
+                    <span style={{ whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{beat.title} · {window.getArtistName(beat.artist)} type beat</span>
+                  </span>
+                  <a href={youtubeLink} target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:'var(--blue)', display:'inline-flex', alignItems:'center', gap:6, flexShrink:0 }}>
+                    Åbn på YouTube <I.ext width={11} height={11} />
+                  </a>
+                </div>
               </div>
-              <a href={youtubeLink} target="_blank" rel="noopener" style={{ fontSize:12, color:'rgba(255,255,255,.8)', display:'inline-flex', alignItems:'center', gap:6 }}>
-                Åbn på YouTube <I.ext width={11} height={11} />
-              </a>
-            </div>
-          </div>
-        ) : (
-          <YouTubePlaceholder beat={beat} inQueue={inQueue} queuePosition={queuePosition} hasJobs={jobs.length > 0} onNav={onNav} />
-        )}
+            );
+          }
+          if (youtubeLink) {
+            return (
+              <div style={{
+                borderRadius:10, border:'1px solid var(--border)', background:'var(--bg-1)',
+                padding:'22px 24px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:16
+              }}>
+                <div style={{ fontSize:14, color:'var(--text-2)' }}>
+                  Linket kunne ikke indlejres som YouTube-video.
+                </div>
+                <a href={youtubeLink} target="_blank" rel="noopener noreferrer" style={{ fontSize:13, color:'var(--blue)', display:'inline-flex', alignItems:'center', gap:6, flexShrink:0 }}>
+                  Åbn link <I.ext width={12} height={12} />
+                </a>
+              </div>
+            );
+          }
+          return <YouTubePlaceholder beat={beat} inQueue={inQueue} queuePosition={queuePosition} hasJobs={jobs.length > 0} onNav={onNav} />;
+        })()}
       </div>
 
       {/* Info row */}
@@ -507,6 +500,32 @@ function LinkRow({ icon, label, color, link }) {
       <window.Icons.ext width={12} height={12} style={{color:'var(--text-3)'}} />
     </a>
   );
+}
+
+// Extract the 11-char video id from any common YouTube URL form
+// (watch?v=, youtu.be/, /embed/, /shorts/, /live/).
+function ytVideoId(url) {
+  if (!url) return null;
+  const s = String(url).trim();
+  try {
+    const u = new URL(s);
+    const host = u.hostname.replace(/^www\./, '');
+    if (host === 'youtu.be') {
+      const id = u.pathname.split('/').filter(Boolean)[0];
+      return /^[A-Za-z0-9_-]{11}$/.test(id || '') ? id : null;
+    }
+    if (host.endsWith('youtube.com') || host.endsWith('youtube-nocookie.com')) {
+      const v = u.searchParams.get('v');
+      if (v && /^[A-Za-z0-9_-]{11}$/.test(v)) return v;
+      const parts = u.pathname.split('/').filter(Boolean);
+      const i = parts.findIndex((p) => p === 'embed' || p === 'shorts' || p === 'v' || p === 'live');
+      if (i !== -1 && parts[i + 1] && /^[A-Za-z0-9_-]{11}$/.test(parts[i + 1])) return parts[i + 1];
+    }
+  } catch (_e) {
+    const m = s.match(/(?:v=|youtu\.be\/|embed\/|shorts\/|live\/)([A-Za-z0-9_-]{11})/);
+    if (m) return m[1];
+  }
+  return null;
 }
 
 window.BeatDetailPage = BeatDetailPage;

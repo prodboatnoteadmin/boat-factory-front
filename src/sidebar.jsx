@@ -4,8 +4,8 @@ const { useState: useStateSB } = React;
 function Sidebar({ current, onNav, onLogout }) {
   const items = [
     { id: 'beats',     label: 'Beats',     icon: <window.Icons.beat /> },
-    { id: 'artists',   label: 'Artists',   icon: <window.Icons.user /> },
     { id: 'queue',     label: 'Queue', icon: <window.Icons.queue /> },
+    { id: 'artists',   label: 'Artists',   icon: <window.Icons.user /> },
   ];
   return (
     <aside style={{

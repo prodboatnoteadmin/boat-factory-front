@@ -62,7 +62,7 @@ function ArtistDetailPage({ artistId, onBack, onNav, onOpenBeat, onEditArtist })
           <window.ArtistAvatar id={artist.id} name={artist.name} size={80} />
           <div>
             <h1 style={{margin:'0 0 6px 0', fontSize:36, fontWeight:700, letterSpacing:'-.03em'}}>{artist.name}</h1>
-            <div style={{fontSize:14, color:'var(--text-3)'}}>{artist.beatsCount} beats · {artistBeats.filter(b => window.getLatestPublishDate(b.id)).length} udgivet</div>
+            <div style={{fontSize:14, color:'var(--text-3)'}}>{artist.beatsCount} beats</div>
           </div>
         </div>
         <window.DropdownMenu items={[

@@ -97,15 +97,15 @@ function BeatFormModal({ open, beatId, onClose, onSave }) {
               <ChipInput values={form.coCollabs} onChange={(v) => set('coCollabs', v)} placeholder="Skriv co-collabs navn + Enter" />
             </Field>
 
-            <Field label="Beatstars link" required full>
+            <Field label="Collab folder">
+              <CollabFolderInput value={form.filePath} onChange={(v) => set('filePath', v)} />
+            </Field>
+            <Field label="Beatstars link" required>
               <window.TextInput value={form.beatstars} onChange={(v) => set('beatstars', v)} placeholder="Skriv linket til beatet på Beatstars" fullWidth />
             </Field>
 
             <Field label="Filnavn" required>
               <window.TextInput value={form.fileName} onChange={(v) => set('fileName', v)} placeholder="Skriv det præcise filnavn (fx. beat.mp3)" fullWidth />
-            </Field>
-            <Field label="Collab folder">
-              <CollabFolderInput value={form.filePath} onChange={(v) => set('filePath', v)} />
             </Field>
           </div>
         </div>

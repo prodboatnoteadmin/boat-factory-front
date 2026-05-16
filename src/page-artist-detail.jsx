@@ -73,10 +73,10 @@ function ArtistDetailPage({ artistId, onBack, onNav, onOpenBeat, onEditArtist })
       {/* Profile links — read only */}
       <div style={{ marginBottom:24 }}>
         <div style={{display:'flex', gap:10, flexWrap:'wrap'}}>
-          {artist.tiktok && <ProfileLink icon={<I.tt />} label="TikTok" handle={'@' + artist.tiktok} color="#fff" />}
-          {artist.youtube && <ProfileLink icon={<I.yt />} label="YouTube" handle={artist.youtube} color="#ff2a2a" />}
-          {artist.spotify && <ProfileLink icon={<I.sp />} label="Spotify" handle={artist.spotify} color="#1DB954" />}
-          {artist.instagram && <ProfileLink icon={<I.ig />} label="Instagram" handle={'@' + artist.instagram} color="#e1306c" />}
+          {artist.tiktok && <ProfileLink icon={<I.tt />} label="TikTok" handle={'@' + artist.tiktok} href={socialUrl('tiktok', artist.tiktok)} color="#fff" />}
+          {artist.youtube && <ProfileLink icon={<I.yt />} label="YouTube" handle={artist.youtube} href={socialUrl('youtube', artist.youtube)} color="#ff2a2a" />}
+          {artist.spotify && <ProfileLink icon={<I.sp />} label="Spotify" handle={artist.spotify} href={socialUrl('spotify', artist.spotify)} color="#1DB954" />}
+          {artist.instagram && <ProfileLink icon={<I.ig />} label="Instagram" handle={'@' + artist.instagram} href={socialUrl('instagram', artist.instagram)} color="#e1306c" />}
         </div>
       </div>
 
@@ -185,9 +185,23 @@ function InlineTagGroup({ title, subtitle, tags, onAdd, onRemove, accent, placeh
   );
 }
 
-function ProfileLink({ icon, label, handle, color }) {
+function socialUrl(kind, v) {
+  if (!v) return null;
+  const s = String(v).trim();
+  if (/^https?:\/\//i.test(s)) return s;
+  const h = s.replace(/^@+/, '');
+  switch (kind) {
+    case 'tiktok': return `https://www.tiktok.com/@${h}`;
+    case 'youtube': return `https://www.youtube.com/@${h}`;
+    case 'spotify': return `https://open.spotify.com/artist/${h}`;
+    case 'instagram': return `https://www.instagram.com/${h}/`;
+    default: return s;
+  }
+}
+
+function ProfileLink({ icon, label, handle, href, color }) {
   return (
-    <a href="#" style={{
+    <a href={href || '#'} target="_blank" rel="noopener noreferrer" style={{
       display:'flex', alignItems:'center', gap:12, padding:'12px 16px',
       background:'var(--bg-1)', border:'1px solid var(--border-strong)', borderRadius:8,
       minWidth:200, transition:'all .15s'

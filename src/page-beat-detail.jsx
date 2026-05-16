@@ -100,30 +100,19 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
           const vid = youtubeLink ? ytVideoId(youtubeLink) : null;
           if (vid) {
             return (
-              <div>
-                <div style={{
-                  position:'relative', borderRadius:10, overflow:'hidden',
-                  aspectRatio:'16/9', background:'#000',
-                  border:'1px solid var(--border)',
-                }}>
-                  <iframe
-                    src={`https://www.youtube.com/embed/${vid}`}
-                    title={`${beat.title} · ${window.getArtistName(beat.artist)}`}
-                    style={{ position:'absolute', inset:0, width:'100%', height:'100%', border:0 }}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                    referrerPolicy="strict-origin-when-cross-origin"
-                  />
-                </div>
-                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, marginTop:10 }}>
-                  <span style={{ display:'inline-flex', alignItems:'center', gap:8, fontSize:12, color:'var(--text-3)', minWidth:0 }}>
-                    <span style={{ padding:'3px 8px', borderRadius:4, background:'rgba(232,72,85,.95)', color:'#fff', fontSize:10, fontWeight:800, letterSpacing:'.1em', flexShrink:0 }}>YOUTUBE</span>
-                    <span style={{ whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{beat.title} · {window.getArtistName(beat.artist)} type beat</span>
-                  </span>
-                  <a href={youtubeLink} target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:'var(--blue)', display:'inline-flex', alignItems:'center', gap:6, flexShrink:0 }}>
-                    Åbn på YouTube <I.ext width={11} height={11} />
-                  </a>
-                </div>
+              <div style={{
+                position:'relative', borderRadius:10, overflow:'hidden',
+                aspectRatio:'16/9', background:'#000',
+                border:'1px solid var(--border)',
+              }}>
+                <iframe
+                  src={`https://www.youtube.com/embed/${vid}`}
+                  title={`${beat.title} · ${window.getArtistName(beat.artist)}`}
+                  style={{ position:'absolute', inset:0, width:'100%', height:'100%', border:0 }}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  referrerPolicy="strict-origin-when-cross-origin"
+                />
               </div>
             );
           }

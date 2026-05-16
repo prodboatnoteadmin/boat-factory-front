@@ -58,6 +58,17 @@ function App() {
 
   const refresh = () => (window.__refreshData ? window.__refreshData() : Promise.resolve());
 
+  // Reload data from Supabase whenever we land on a list view (e.g.
+  // coming back from a beat) so the list reflects the current DB.
+  const firstNavRef = useRefApp(true);
+  useEffectApp(() => {
+    if (firstNavRef.current) { firstNavRef.current = false; return; }
+    if (route.page === 'beats' || route.page === 'artists' || route.page === 'queue') {
+      refresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.page]);
+
   const handleBulkAddToQueue = (ids) => {
     const toAdd = ids.filter(id => !queueIds.includes(id));
     // Add to TOP of queue

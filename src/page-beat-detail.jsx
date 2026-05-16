@@ -178,11 +178,38 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
 
         <div style={{ display:'flex', flexDirection:'column', gap:24 }}>
           <window.Card title="Links">
-            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-              <LinkLine icon={<I.bs />} color="#E5384F" label="BeatStars" href={beat.beatstars} />
-              <LinkLine icon={<I.yt />} color="#ff2a2a" label="YouTube" href={youtubeLink} />
-              <LinkLine icon={<I.yt />} color="#ff2a2a" label="YouTube Studio"
-                href={(() => { const v = youtubeLink ? ytVideoId(youtubeLink) : null; return v ? `https://studio.youtube.com/video/${v}/edit` : null; })()} />
+            <div style={{ display:'flex', flexDirection:'column', gap:10, alignItems:'flex-start' }}>
+              {beat.beatstars ? (
+                <a href={beat.beatstars} target="_blank" rel="noopener noreferrer" title="Åbn på BeatStars" style={logoBtn(false)}>
+                  <I.bs width={16} height={16} style={{ color:'#E5384F' }} /> BeatStars <I.ext width={12} height={12} />
+                </a>
+              ) : (
+                <span title="Intet BeatStars-link" style={logoBtn(true)}>
+                  <I.bs width={16} height={16} /> BeatStars
+                </span>
+              )}
+              {youtubeLink ? (
+                <a href={youtubeLink} target="_blank" rel="noopener noreferrer" title="Åbn på YouTube" style={logoBtn(false)}>
+                  <I.yt width={16} height={16} style={{ color:'#ff2a2a' }} /> YouTube <I.ext width={12} height={12} />
+                </a>
+              ) : (
+                <span title="Intet YouTube-link" style={logoBtn(true)}>
+                  <I.yt width={16} height={16} /> YouTube
+                </span>
+              )}
+              {(() => {
+                const v = youtubeLink ? ytVideoId(youtubeLink) : null;
+                const url = v ? `https://studio.youtube.com/video/${v}/edit` : null;
+                return url ? (
+                  <a href={url} target="_blank" rel="noopener noreferrer" title="Åbn i YouTube Studio" style={logoBtn(false)}>
+                    <I.yt width={16} height={16} style={{ color:'#ff2a2a' }} /> YouTube Studio <I.ext width={12} height={12} />
+                  </a>
+                ) : (
+                  <span title="Intet YouTube-link" style={logoBtn(true)}>
+                    <I.yt width={16} height={16} /> YouTube Studio
+                  </span>
+                );
+              })()}
             </div>
           </window.Card>
           <window.Card title="Info">
@@ -561,26 +588,6 @@ function FileItem({ label, name }) {
       }}>{label.toUpperCase()}</span>
       <span style={{ fontSize:12, fontFamily:'JetBrains Mono, monospace', color:'var(--text-2)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}>{name}</span>
     </div>
-  );
-}
-
-function LinkLine({ icon, color, label, href }) {
-  if (!href) {
-    return (
-      <div title="Intet link" style={{ display:'flex', alignItems:'center', gap:10, opacity:.45, cursor:'not-allowed' }}>
-        <span style={{ display:'inline-flex', color }}>{React.cloneElement(icon, { width:15, height:15 })}</span>
-        <span style={{ fontSize:13, fontWeight:600, color:'var(--text-4)' }}>{label}</span>
-        <span style={{ fontSize:12, color:'var(--text-4)', flex:1, textAlign:'right' }}>Intet link</span>
-      </div>
-    );
-  }
-  return (
-    <a href={href} target="_blank" rel="noopener noreferrer" style={{ display:'flex', alignItems:'center', gap:10 }}>
-      <span style={{ display:'inline-flex', color }}>{React.cloneElement(icon, { width:15, height:15 })}</span>
-      <span style={{ fontSize:13, fontWeight:600 }}>{label}</span>
-      <span style={{ fontSize:12, color:'var(--blue)', fontFamily:'JetBrains Mono, monospace', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1, textAlign:'right' }}>{href.replace(/^https?:\/\//, '')}</span>
-      <window.Icons.ext width={12} height={12} style={{color:'var(--text-3)'}} />
-    </a>
   );
 }
 

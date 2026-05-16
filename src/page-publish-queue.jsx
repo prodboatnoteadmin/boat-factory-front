@@ -21,7 +21,7 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
 
   // Same column metrics as the Beats list (40/2fr/1.2fr/70/80/70) plus
   // a position col, a drag handle, and two action buttons.
-  const cols = '44px 28px minmax(220px, 2fr) minmax(140px, 1.2fr) 70px 80px 70px 44px 48px';
+  const cols = '44px 28px minmax(220px, 2fr) minmax(140px, 1.2fr) 70px 80px 70px 76px 44px 48px';
   const MIN_W = 860;
 
   const queueBeats = queueIds
@@ -101,6 +101,7 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
             <QHead>BPM</QHead>
             <QHead>Key</QHead>
             <QHead>Årstal</QHead>
+            <QHead>Rating</QHead>
             <QHead></QHead>
             <QHead></QHead>
           </div>
@@ -154,6 +155,7 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
                 <div className="mono" style={{fontSize:13, color:'var(--text-2)'}}>{b.bpm}</div>
                 <div className="mono" style={{fontSize:13, color:'var(--text-2)'}}>{b.key}</div>
                 <div className="mono" style={{fontSize:13, color:'var(--text-3)'}}>{b.year}</div>
+                <div><window.CategoryPill category={b.category} size="sm" /></div>
                 <div onClick={(e) => e.stopPropagation()}>
                   <button onClick={() => moveToTop(b.id)} disabled={pos === 0}
                     title={pos === 0 ? 'Allerede #1' : 'Flyt til #1'} style={{

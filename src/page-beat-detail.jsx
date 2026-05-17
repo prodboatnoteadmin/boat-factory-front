@@ -471,19 +471,8 @@ function UdgivelsesListe({ beat, jobs, runs = [], inQueue, queuePosition, onNav,
   const showManualInput = !hasDetectedYt && !savedManualYt;
   const showInput = showManualInput || editing;
 
-  // "Udgivet" row: prefer the beat_run_log record(s); if none, fall back to
-  // the beat's own data so the row is always present.
-  const folderFromPath = (p) => (p ? p.replace(/\/[^/]+\.[^/.]+$/, '') : '');
-  const udgivelser = (runs && runs.length ? runs : [{
-    id: 'beat-' + beat.id,
-    date: beat.uploadDate || '',
-    youtubeTitle: beat.title || '',
-    artist: (window.getArtistName ? window.getArtistName(beat.artist) : '') || '',
-    songname: beat.title || '',
-    youtubeLink: beat.youtube || '',
-    uploadToYoutube: beat.uploadDate || '',
-    fileFolder: folderFromPath(beat.filePath || ''),
-  }]).filter((u) => u.songname || u.artist || u.youtubeLink || u.uploadToYoutube || beat.created);
+  // "Udgivet" row: real records from the beat_run_log table only — no fallback.
+  const udgivelser = runs || [];
 
   const saveManual = async () => {
     const v = manualYt.trim();
@@ -545,7 +534,7 @@ function UdgivelsesListe({ beat, jobs, runs = [], inQueue, queuePosition, onNav,
               <span style={{fontSize:13, fontWeight:600, color:'#4cd787'}}>UDGIVET</span>
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:18, minWidth:0, flexWrap:'wrap' }}>
-              <span style={cell}>{r.songname || beat.title || '—'}</span>
+              <span style={cell}>{r.songname || '—'}</span>
               <span style={cell}>{r.artist || '—'}</span>
               <span style={cell}>Tilføjet: {created}</span>
               <span style={cell}>Tilføjet til YouTube: {ytUp}</span>

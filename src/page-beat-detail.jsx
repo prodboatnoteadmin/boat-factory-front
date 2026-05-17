@@ -424,13 +424,16 @@ function Stat({ label, value, mono }) {
 function UdgivelsesListe({ beat, jobs, inQueue, queuePosition, onNav, onSeeInQueue, manualYt, setManualYt, savedManualYt, setSavedManualYt, hasDetectedYt }) {
   const I = window.Icons;
   const [expanded, setExpanded] = React.useState(null);
+  const [editing, setEditing] = React.useState(false);
   const showManualInput = !hasDetectedYt && !savedManualYt;
+  const showInput = showManualInput || editing;
 
   const saveManual = async () => {
     const v = manualYt.trim();
     if (!v) return;
     setSavedManualYt(v);
     setManualYt('');
+    setEditing(false);
     try {
       await window.DB.updateBeatYouTube(beat.id, v);
       if (window.__refreshData) await window.__refreshData();
@@ -486,15 +489,26 @@ function UdgivelsesListe({ beat, jobs, inQueue, queuePosition, onNav, onSeeInQue
             <div style={{ fontSize:14, fontWeight:600 }}>Manuelt tilføjet YouTube-link</div>
             <a href={savedManualYt} target="_blank" rel="noopener" style={{ fontSize:12, color:'var(--blue)', fontFamily:'JetBrains Mono, monospace', wordBreak:'break-all' }}>{savedManualYt.replace(/^https?:\/\//, '')}</a>
           </div>
-          <button onClick={() => setSavedManualYt(null)} title="Fjern manuelt link" style={{
-            width:34, height:34, borderRadius:6, color:'var(--text-3)',
-            border:'1px solid var(--border-strong)', background:'transparent',
-            display:'inline-flex', alignItems:'center', justifyContent:'center'
-          }}
-            onMouseEnter={e=>{e.currentTarget.style.background='rgba(232,72,85,.12)';e.currentTarget.style.color='#ec6d77';e.currentTarget.style.borderColor='rgba(232,72,85,.5)'}}
-            onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='var(--text-3)';e.currentTarget.style.borderColor='var(--border-strong)'}}>
-            <I.x width={14} height={14} />
-          </button>
+          <div style={{ display:'flex', gap:8 }}>
+            <button onClick={() => { setManualYt(savedManualYt); setEditing(true); }} title="Ændre link" style={{
+              height:34, padding:'0 12px', borderRadius:6, fontSize:13, fontWeight:600, color:'var(--text-2)',
+              border:'1px solid var(--border-strong)', background:'transparent',
+              display:'inline-flex', alignItems:'center', gap:6
+            }}
+              onMouseEnter={e=>{e.currentTarget.style.background='var(--bg-hover)';e.currentTarget.style.color='var(--text)'}}
+              onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='var(--text-2)'}}>
+              <I.edit width={13} height={13} /> Ændre
+            </button>
+            <button onClick={() => setSavedManualYt(null)} title="Fjern manuelt link" style={{
+              width:34, height:34, borderRadius:6, color:'var(--text-3)',
+              border:'1px solid var(--border-strong)', background:'transparent',
+              display:'inline-flex', alignItems:'center', justifyContent:'center'
+            }}
+              onMouseEnter={e=>{e.currentTarget.style.background='rgba(232,72,85,.12)';e.currentTarget.style.color='#ec6d77';e.currentTarget.style.borderColor='rgba(232,72,85,.5)'}}
+              onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='var(--text-3)';e.currentTarget.style.borderColor='var(--border-strong)'}}>
+              <I.x width={14} height={14} />
+            </button>
+          </div>
         </div>
       )}
 
@@ -505,19 +519,19 @@ function UdgivelsesListe({ beat, jobs, inQueue, queuePosition, onNav, onSeeInQue
         </div>
       )}
       {jobs.map((job, idx) => (
-        <JobRow key={job.id} job={job} expanded={expanded === job.id} onToggle={() => setExpanded(expanded === job.id ? null : job.id)} isLast={idx === jobs.length - 1 && !showManualInput} />
+        <JobRow key={job.id} job={job} expanded={expanded === job.id} onToggle={() => setExpanded(expanded === job.id ? null : job.id)} isLast={idx === jobs.length - 1 && !showInput} />
       ))}
 
       {/* Manual YouTube URL input — at bottom */}
-      {showManualInput && (
-        <div style={{ padding:'16px 20px', borderTop: (inQueue || jobs.length) ? '1px solid var(--border)' : 'none', background:'var(--bg-1)' }}>
+      {showInput && (
+        <div style={{ padding:'16px 20px', borderTop: (inQueue || jobs.length || savedManualYt) ? '1px solid var(--border)' : 'none', background:'var(--bg-1)' }}>
           <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8 }}>
             <span style={{
               width:26, height:26, borderRadius:5, background:'rgba(255,42,42,.12)', color:'#ff5252',
               display:'inline-flex', alignItems:'center', justifyContent:'center', flexShrink:0
             }}><I.yt width={14} height={14} /></span>
             <div style={{ flex:1 }}>
-              <div style={{ fontSize:13, fontWeight:600 }}>Tilføj YouTube-link manuelt</div>
+              <div style={{ fontSize:13, fontWeight:600 }}>{editing ? 'Rediger YouTube-link' : 'Tilføj YouTube-link manuelt'}</div>
               <div style={{ fontSize:12, color:'var(--text-3)', marginTop:2 }}>Hvis beatet allerede er uploadet uden om render-motoren, kan du indsætte URL'en her.</div>
             </div>
           </div>

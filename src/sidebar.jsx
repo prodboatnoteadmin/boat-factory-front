@@ -66,7 +66,7 @@ function Sidebar({ current, onNav, onLogout }) {
       }}>
         <div style={{
           width:32, height:32, borderRadius:'50%',
-          background:'linear-gradient(135deg, #4A90D9, #2E68A8)',
+          background:'#5C6FC9',
           display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:700
         }}>BN</div>
         <div style={{flex:1, minWidth:0}}>

@@ -1,5 +1,5 @@
 // Beats list — table only, no status, checkbox bulk action
-function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
+function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue, collab, embedded }) {
   const I = window.Icons;
   const [search, setSearch] = React.useState('');
   const [artistFilter, setArtistFilter] = React.useState('');
@@ -24,6 +24,7 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
       if (artistFilter && b.artist !== artistFilter) return false;
       if (statusFilter === 'queued' && b.status !== 'pending') return false;
       if (statusFilter === 'notqueued' && b.status === 'pending') return false;
+      if (collab && b.collab !== collab) return false;
       return true;
     });
     arr.sort((a, b) => {
@@ -39,10 +40,10 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
       return 0;
     });
     return arr;
-  }, [search, artistFilter, statusFilter, sortBy, sortDir]);
+  }, [search, artistFilter, statusFilter, collab, sortBy, sortDir]);
 
   // Infinite scroll: 20 at a time, load 20 more when the sentinel shows.
-  React.useEffect(() => { setShown(20); }, [search, artistFilter, sortBy, sortDir]);
+  React.useEffect(() => { setShown(20); }, [search, artistFilter, statusFilter, collab, sortBy, sortDir]);
   React.useEffect(() => {
     if (shown >= filtered.length) return;
     const el = moreRef.current;
@@ -74,19 +75,23 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
 
   return (
     <div>
-      <window.PageHeader title="Beats" subtitle={`${filtered.length} af ${window.DATA.BEATS.length} beats vist`}>
-        <window.Btn kind="primary" icon={<I.plus />} onClick={onNewBeat}>Nyt Beat</window.Btn>
-      </window.PageHeader>
+      {!embedded && (
+        <window.PageHeader title="Beats" subtitle={`${filtered.length} af ${window.DATA.BEATS.length} beats vist`}>
+          <window.Btn kind="primary" icon={<I.plus />} onClick={onNewBeat}>Nyt Beat</window.Btn>
+        </window.PageHeader>
+      )}
 
       {/* Filter bar */}
       <div style={{ display:'flex', gap:10, marginBottom:18, alignItems:'center', flexWrap:'wrap' }}>
         <div style={{flex:'1 1 300px', minWidth:240}}>
           <window.TextInput value={search} onChange={setSearch} placeholder="Søg efter sangnavn" icon={<I.search />} fullWidth />
         </div>
-        <window.Select value={artistFilter} onChange={setArtistFilter} options={[
-          { value:'', label:'Alle artister' },
-          ...window.DATA.ARTISTS.map(a => ({ value:a.id, label:a.name }))
-        ]} style={{width:180}} />
+        {!embedded && (
+          <window.Select value={artistFilter} onChange={setArtistFilter} options={[
+            { value:'', label:'Alle artister' },
+            ...window.DATA.ARTISTS.map(a => ({ value:a.id, label:a.name }))
+          ]} style={{width:180}} />
+        )}
         <window.Select value={statusFilter} onChange={setStatusFilter} options={[
           { value:'', label:'Vis alle' },
           { value:'notqueued', label:'Ikke i kø' },

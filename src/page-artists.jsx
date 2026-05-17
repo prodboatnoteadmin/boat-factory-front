@@ -8,7 +8,7 @@ function ArtistsPage({ onOpenArtist, onNewArtist }) {
 
   return (
     <div>
-      <window.PageHeader title="Artists" subtitle={`${filtered.length} artister · ${window.DATA.BEATS.length} beats samlet`}>
+      <window.PageHeader title="Artister" subtitle={`${filtered.length} artister · ${window.DATA.BEATS.length} beats samlet`}>
         <window.Btn icon={<I.plus />} onClick={onNewArtist}>Ny artist</window.Btn>
       </window.PageHeader>
 

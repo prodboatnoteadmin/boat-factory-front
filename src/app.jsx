@@ -51,6 +51,15 @@ function App() {
     } else {
       route = { page: 'artists', beatId: null, artistId: null };
     }
+  } else if (parts[0] === 'collabs') {
+    if (parts[1]) {
+      const slug = decodeURIComponent(parts[1]);
+      const names = Array.from(new Set(window.DATA.BEATS.map(b => (b.collab || '').trim()).filter(Boolean)));
+      const name = names.find(n => slugify(n) === slug) || null;
+      route = { page: 'collab-detail', beatId: null, artistId: null, collab: name };
+    } else {
+      route = { page: 'collabs', beatId: null, artistId: null, collab: null };
+    }
   } else if (parts[0] === 'beats' && parts[1]) {
     const slug = decodeURIComponent(parts[1]);
     const b = window.DATA.BEATS.find(x => slugify(x.title) === slug || x.id === slug);
@@ -67,6 +76,8 @@ function App() {
       navigate('/beats', { replace: true });
     } else if (route.page === 'artist-detail' && !route.artistId) {
       navigate('/artists', { replace: true });
+    } else if (route.page === 'collab-detail' && !route.collab) {
+      navigate('/collabs', { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
@@ -95,6 +106,7 @@ function App() {
   const nav = (page) => navigate('/' + page);
   const openBeat = (id) => navigate('/beats/' + beatSlug(id));
   const openArtist = (id) => navigate('/artists/' + artistSlug(id));
+  const openCollab = (name) => navigate('/collabs/' + slugify(name));
   const goBack = () => navigate(-1);
   const openNewBeat = () => { setModalBeatId(null); setModalOpen(true); };
   const openEditBeat = (id) => { setModalBeatId(id); setModalOpen(true); };
@@ -184,6 +196,13 @@ function App() {
                   queueIds={queueIds} setQueueIds={setQueueIds}
                   pendingIds={pendingIds} setPendingIds={setPendingIds} />;
       break;
+    case 'collabs':
+      pageEl = <window.CollabsPage onOpenCollab={openCollab} />;
+      break;
+    case 'collab-detail':
+      pageEl = <window.CollabDetailPage collab={route.collab} onBack={goBack}
+                  onOpenBeat={openBeat} onAddToQueue={handleBulkAddToQueue} />;
+      break;
     default:
       pageEl = <div>404</div>;
   }
@@ -191,6 +210,7 @@ function App() {
   const sidebarActive = ({
     'beat-detail': 'beats',
     'artist-detail': 'artists',
+    'collab-detail': 'collabs',
   })[route.page] || route.page;
 
   return (

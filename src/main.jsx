@@ -12,6 +12,7 @@ import './page-beat-detail.jsx';
 import './page-artists.jsx';
 import './page-artist-detail.jsx';
 import './page-publish-queue.jsx';
+import './page-collabs.jsx';
 import './beat-form.jsx';
 import './artist-form.jsx';
 import './data.jsx';

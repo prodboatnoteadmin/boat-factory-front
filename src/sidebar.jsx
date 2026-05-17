@@ -5,7 +5,8 @@ function Sidebar({ current, onNav, onLogout }) {
   const items = [
     { id: 'beats',     label: 'Beats',     icon: <window.Icons.beat /> },
     { id: 'queue',     label: 'Queue', icon: <window.Icons.queue /> },
-    { id: 'artists',   label: 'Artists',   icon: <window.Icons.user /> },
+    { id: 'artists',   label: 'Artister',  icon: <window.Icons.user /> },
+    { id: 'collabs',   label: 'Collabs',   icon: <window.Icons.mic /> },
   ];
   return (
     <aside style={{

@@ -155,11 +155,10 @@ window.loadData = async function loadData() {
     const b = beatById(beatId);
     return b && b.youtube ? b.youtube : null;
   };
-  // "Udgivet" date: published beats use their upload date (fallback modified).
+  // "Udgivet på YouTube" date = the beat's YouTube upload_date, whenever set.
   window.getLatestPublishDate = (beatId) => {
     const b = beatById(beatId);
-    if (!b || b.status !== 'published') return null;
-    return b.uploadDate || b.modified || null;
+    return b && b.uploadDate ? b.uploadDate : null;
   };
 
   return window.DATA;

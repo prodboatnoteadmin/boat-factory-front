@@ -471,6 +471,20 @@ function UdgivelsesListe({ beat, jobs, runs = [], inQueue, queuePosition, onNav,
   const showManualInput = !hasDetectedYt && !savedManualYt;
   const showInput = showManualInput || editing;
 
+  // "Udgivet" row: prefer the beat_run_log record(s); if none, fall back to
+  // the beat's own data so the row is always present.
+  const folderFromPath = (p) => (p ? p.replace(/\/[^/]+\.[^/.]+$/, '') : '');
+  const udgivelser = (runs && runs.length ? runs : [{
+    id: 'beat-' + beat.id,
+    date: beat.uploadDate || '',
+    youtubeTitle: beat.title || '',
+    artist: (window.getArtistName ? window.getArtistName(beat.artist) : '') || '',
+    songname: '',
+    youtubeLink: beat.youtube || '',
+    uploadToYoutube: beat.uploadDate || '',
+    fileFolder: folderFromPath(beat.filePath || ''),
+  }]).filter((u) => u.date || u.youtubeTitle || u.youtubeLink || u.fileFolder || u.uploadToYoutube);
+
   const saveManual = async () => {
     const v = manualYt.trim();
     if (!v) return;
@@ -513,9 +527,9 @@ function UdgivelsesListe({ beat, jobs, runs = [], inQueue, queuePosition, onNav,
         </div>
       )}
 
-      {/* Udgivet (run log table) — single row, shown under the queue position */}
-      {runs.map((r, i) => {
-        const last = i === runs.length - 1 && !savedManualYt && !jobs.length && !showManualInput;
+      {/* Udgivet (run log table, falls back to beat data) — under the queue position */}
+      {udgivelser.map((r, i) => {
+        const last = i === udgivelser.length - 1 && !savedManualYt && !jobs.length && !showManualInput;
         const iconBtn = {
           width:32, height:32, borderRadius:6, color:'var(--text-3)', flexShrink:0,
           border:'1px solid var(--border-strong)', background:'transparent',
@@ -595,7 +609,7 @@ function UdgivelsesListe({ beat, jobs, runs = [], inQueue, queuePosition, onNav,
       )}
 
       {/* Jobs */}
-      {runs.length === 0 && jobs.length === 0 && !inQueue && !savedManualYt && !showManualInput && (
+      {udgivelser.length === 0 && jobs.length === 0 && !inQueue && !savedManualYt && !showManualInput && (
         <div style={{ padding:'40px 20px', textAlign:'center', color:'var(--text-3)', fontSize:14 }}>
           Ingen udgivelser registreret for dette beat.
         </div>

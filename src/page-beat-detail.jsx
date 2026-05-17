@@ -532,7 +532,7 @@ function UdgivelsesListe({ beat, jobs, runs = [], inQueue, queuePosition, onNav,
         const last = i === udgivelser.length - 1 && !savedManualYt && !jobs.length && !showManualInput;
         const created = beat.created ? window.fmtDate(beat.created) : '—';
         const ytUp = r.uploadToYoutube ? window.fmtDate(r.uploadToYoutube) : '—';
-        const cell = { fontSize:12, color:'var(--text-3)', whiteSpace:'nowrap', fontWeight:400 };
+        const cell = { fontSize:14, fontWeight:600, whiteSpace:'nowrap' };
         return (
           <div key={r.id} style={{
             display:'grid', gridTemplateColumns:'120px 1fr auto',

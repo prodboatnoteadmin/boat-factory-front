@@ -98,7 +98,9 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
         </div>
 
         <div style={{display:'flex', gap:8, alignItems:'center'}}>
-          {inQueue ? (
+          {beat.status === 'processing' ? (
+            <div style={{ width:170 }} title="Behandler…"><window.ProgressBar /></div>
+          ) : inQueue ? (
             <window.Btn kind="secondary" icon={<I.check />} onClick={() => onNav('queue')}>I kø #{queuePosition + 1}</window.Btn>
           ) : (
             <window.Btn kind="primary" icon={<I.plus />} onClick={() => onAddToQueue && onAddToQueue(beat.id)}>Tilføj til kø</window.Btn>
@@ -421,11 +423,17 @@ function UdgivelsesListe({ beat, jobs, inQueue, queuePosition, onNav, manualYt, 
   const [expanded, setExpanded] = React.useState(null);
   const showManualInput = !hasDetectedYt && !savedManualYt;
 
-  const saveManual = () => {
+  const saveManual = async () => {
     const v = manualYt.trim();
     if (!v) return;
     setSavedManualYt(v);
     setManualYt('');
+    try {
+      await window.DB.updateBeatYouTube(beat.id, v);
+      if (window.__refreshData) await window.__refreshData();
+    } catch (e) {
+      alert('Kunne ikke gemme YouTube-link: ' + e.message);
+    }
   };
 
   return (

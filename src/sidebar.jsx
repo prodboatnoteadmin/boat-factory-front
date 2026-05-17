@@ -13,8 +13,12 @@ function Sidebar({ current, onNav, onLogout }) {
       background:'var(--bg-1)', borderRight:'1px solid var(--border)',
       display:'flex', flexDirection:'column', padding:'20px 14px', zIndex:10,
     }}>
-      {/* logo */}
-      <div style={{ display:'flex', alignItems:'center', gap:10, padding:'4px 10px 22px 10px', borderBottom:'1px solid var(--border)', marginBottom:18 }}>
+      {/* logo → Beats */}
+      <button onClick={() => onNav('beats')} title="Til Beats" style={{
+        display:'flex', alignItems:'center', gap:10, padding:'4px 10px 22px 10px',
+        borderBottom:'1px solid var(--border)', marginBottom:18,
+        background:'transparent', width:'100%', textAlign:'left', cursor:'pointer'
+      }}>
         <div style={{
           width:34, height:34, borderRadius:8, background:'var(--red)',
           display:'flex', alignItems:'center', justifyContent:'center',
@@ -24,7 +28,7 @@ function Sidebar({ current, onNav, onLogout }) {
         <div style={{display:'flex', flexDirection:'column', lineHeight:1.1}}>
           <span style={{fontWeight:700, fontSize:17, letterSpacing:'-.01em'}}>Beat Manager</span>
         </div>
-      </div>
+      </button>
 
       <nav style={{ display:'flex', flexDirection:'column', gap:2 }}>
         {items.map(it => {

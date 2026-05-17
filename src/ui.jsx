@@ -261,4 +261,17 @@ function getArtistName(id) {
   return a ? a.name : id;
 }
 
-Object.assign(window, { Btn, StatusPill, CategoryPill, Chip, AddChip, Card, TextInput, Select, Toggle, PageHeader, STATUS_COLORS, STATUS_LABEL, fmtNum, fmtDate, fmtRelative, getArtistName, uiStyles, DropdownMenu });
+// Indeterminate "processing" progress bar.
+function ProgressBar({ height = 6, style }) {
+  return (
+    <div style={{ position:'relative', width:'100%', height, borderRadius:999, background:'var(--bg-3)', overflow:'hidden', ...style }}>
+      <div style={{
+        position:'absolute', top:0, bottom:0, width:'40%', left:'-40%', borderRadius:999,
+        background:'linear-gradient(90deg, transparent, var(--blue), transparent)',
+        animation:'bn-bar 1.1s linear infinite'
+      }} />
+    </div>
+  );
+}
+
+Object.assign(window, { Btn, StatusPill, CategoryPill, Chip, AddChip, Card, TextInput, Select, Toggle, PageHeader, ProgressBar, STATUS_COLORS, STATUS_LABEL, fmtNum, fmtDate, fmtRelative, getArtistName, uiStyles, DropdownMenu });

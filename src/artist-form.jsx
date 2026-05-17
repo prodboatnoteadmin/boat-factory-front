@@ -12,12 +12,6 @@ function ArtistFormModal({ open, artistId, onClose, onSave }) {
   });
 
   React.useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
-  React.useEffect(() => {
     if (open) {
       setForm({
         name: existing?.name || '',
@@ -39,7 +33,7 @@ function ArtistFormModal({ open, artistId, onClose, onSave }) {
       alignItems:'flex-start', justifyContent:'center',
       background:'rgba(0,0,0,.65)', backdropFilter:'blur(4px)', padding:'60px 20px 20px',
       overflow:'auto'
-    }} onClick={onClose}>
+    }}>
       <div style={{
         background:'var(--bg-2)', border:'1px solid var(--border-strong)', borderRadius:12,
         width:'100%', maxWidth:520, padding:0, overflow:'hidden',

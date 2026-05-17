@@ -145,6 +145,7 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
                 </span>
                 <div style={{display:'flex', alignItems:'center', gap:10, minWidth:0}}>
                   <span style={{fontWeight:600, fontSize:14, color:'var(--text)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>{b.title}</span>
+                  {b.status === 'processing' && <window.ProgressBar style={{ flex:'1 1 50px', minWidth:40, maxWidth:150 }} />}
                   {postedYt && (
                     <span title="Postet på YouTube" style={{ display:'inline-flex', color:'#ff2a2a', flexShrink:0 }}>
                       <I.yt width={14} height={14} />

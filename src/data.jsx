@@ -203,6 +203,18 @@ window.DB = {
     throwIf(error, 'Kunne ikke slette beat');
   },
 
+  async updateBeatYouTube(id, url) {
+    const { data, error } = await sb()
+      .from('beats')
+      .update({ youtube_link: url || null, updated_at: nowIso() })
+      .eq('id', id)
+      .select('id');
+    throwIf(error, 'Kunne ikke gemme YouTube-link');
+    if (!data || !data.length) {
+      throw new Error('YouTube-linket blev ikke gemt — tjek rettigheder (RLS) i Supabase.');
+    }
+  },
+
   async createArtist(form) {
     const id = uuid();
     const { error } = await sb().from('artists').insert({ id, ...artistFormToRow(form), created_at: nowIso() });

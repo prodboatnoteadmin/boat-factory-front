@@ -148,6 +148,7 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
                   <I.play width={12} height={12} />
                 </div>
                 <div style={{fontWeight:600, fontSize:14, minWidth:0, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>{b.title}</div>
+                {b.status === 'processing' && <window.ProgressBar style={{ flex:'1 1 60px', minWidth:50, maxWidth:170, marginLeft:4 }} />}
               </div>
               <div style={{fontSize:13, color:'var(--text-2)'}}>{window.getArtistName(b.artist)}</div>
               <div className="mono" style={{fontSize:13, color:'var(--text-2)'}}>{b.bpm}</div>

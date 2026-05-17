@@ -30,12 +30,6 @@ function BeatFormModal({ open, beatId, onClose, onSave }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, beatId]);
 
-  React.useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
   if (!open) return null;
 
   const set = (k, v) => setForm({ ...form, [k]: v });
@@ -46,7 +40,7 @@ function BeatFormModal({ open, beatId, onClose, onSave }) {
       alignItems:'flex-start', justifyContent:'center',
       background:'rgba(0,0,0,.65)', backdropFilter:'blur(4px)', padding:'40px 20px',
       overflow:'auto'
-    }} onClick={onClose}>
+    }}>
       <div style={{
         background:'var(--bg-2)', border:'1px solid var(--border-strong)', borderRadius:12,
         width:'100%', maxWidth:760, padding:0, overflow:'hidden',

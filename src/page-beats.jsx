@@ -96,10 +96,10 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue, collab, embedded }) {
         <div style={{ overflowX:'auto' }}>
         <div style={{
           display:'grid',
-          gridTemplateColumns:'40px minmax(220px, 2fr) minmax(140px, 1.2fr) 70px 80px 70px 90px 120px 120px',
+          gridTemplateColumns:'40px minmax(220px, 2fr) minmax(140px, 1.2fr) 70px 80px 70px 90px 120px',
           gap:16,
           alignItems:'center', padding:'14px 20px', borderBottom:'1px solid var(--border)', background:'var(--bg-1)',
-          minWidth: 820
+          minWidth: 700
         }}>
           <CheckBox checked={allChecked} indeterminate={someChecked} onChange={toggleAll} />
           <SortHead label="Sangtitel" col="title" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
@@ -109,7 +109,6 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue, collab, embedded }) {
           <SortHead label="Årstal" col="year" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
           <SortHead label="Position" col="queuePosition" sortBy={sortBy} sortDir={sortDir} setSort={setSort} align="right" />
           <SortHead label="Udgivet på YouTube" col="udgivet" sortBy={sortBy} sortDir={sortDir} setSort={setSort} align="right" />
-          <SortHead label="Tilføjet" col="created" sortBy={sortBy} sortDir={sortDir} setSort={setSort} align="right" />
         </div>
         {filtered.length === 0 && (
           <div style={{padding:'48px', textAlign:'center', color:'var(--text-3)', fontSize:14}}>Ingen beats matcher filtrene.</div>
@@ -120,13 +119,13 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue, collab, embedded }) {
           return (
             <div key={b.id} onClick={() => onOpenBeat(b.id)} style={{
               display:'grid',
-              gridTemplateColumns:'40px minmax(220px, 2fr) minmax(140px, 1.2fr) 70px 80px 70px 90px 120px 120px',
+              gridTemplateColumns:'40px minmax(220px, 2fr) minmax(140px, 1.2fr) 70px 80px 70px 90px 120px',
               gap:16,
               alignItems:'center', padding:'14px 20px',
               borderTop: idx === 0 ? 'none' : '1px solid var(--border)',
               background: checked ? 'rgba(74,144,217,.06)' : 'transparent',
               transition:'background .12s', cursor:'pointer', color:'var(--text)',
-              minWidth: 820
+              minWidth: 700
             }}
               onMouseEnter={e => { if (!checked) e.currentTarget.style.background='var(--bg-hover)'; }}
               onMouseLeave={e => { if (!checked) e.currentTarget.style.background='transparent'; }}
@@ -146,9 +145,6 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue, collab, embedded }) {
               <div className="mono" style={{fontSize:13, color:'var(--text-2)', textAlign:'right'}}>{b.queuePosition ?? ''}</div>
               <div style={{fontSize:12, color: published ? 'var(--text-2)' : 'var(--text-4)', textAlign:'right'}}>
                 {published ? window.fmtDate(published) : '—'}
-              </div>
-              <div style={{fontSize:12, color:'var(--text-2)', textAlign:'right'}}>
-                {b.created ? window.fmtDate(b.created) : '—'}
               </div>
             </div>
           );

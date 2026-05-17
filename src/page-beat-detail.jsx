@@ -530,8 +530,9 @@ function UdgivelsesListe({ beat, jobs, runs = [], inQueue, queuePosition, onNav,
       {/* Udgivet (run log table, falls back to beat data) — aligned with the queue record */}
       {udgivelser.map((r, i) => {
         const last = i === udgivelser.length - 1 && !savedManualYt && !jobs.length && !showManualInput;
-        const created = beat.created ? new Date(beat.created).toLocaleString('da-DK') : '—';
+        const created = beat.created ? window.fmtDate(beat.created) : '—';
         const ytUp = r.uploadToYoutube ? window.fmtDate(r.uploadToYoutube) : '—';
+        const cell = { fontSize:12, color:'var(--text-3)', whiteSpace:'nowrap', fontWeight:400 };
         return (
           <div key={r.id} style={{
             display:'grid', gridTemplateColumns:'120px 1fr auto',
@@ -544,10 +545,10 @@ function UdgivelsesListe({ beat, jobs, runs = [], inQueue, queuePosition, onNav,
               <span style={{fontSize:13, fontWeight:600, color:'#4cd787'}}>UDGIVET</span>
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:18, minWidth:0, flexWrap:'wrap' }}>
-              <span style={{ fontSize:14, fontWeight:600, whiteSpace:'nowrap' }}>{r.songname || beat.title || '—'}</span>
-              <span style={{ fontSize:13, color:'var(--text-2)', whiteSpace:'nowrap' }}>{r.artist || '—'}</span>
-              <span style={{ fontSize:12, color:'var(--text-3)', whiteSpace:'nowrap' }}>Tilføjet: {created}</span>
-              <span style={{ fontSize:12, color:'var(--text-3)', whiteSpace:'nowrap' }}>Tilføjet til YouTube: {ytUp}</span>
+              <span style={cell}>{r.songname || beat.title || '—'}</span>
+              <span style={cell}>{r.artist || '—'}</span>
+              <span style={cell}>Tilføjet: {created}</span>
+              <span style={cell}>Tilføjet til YouTube: {ytUp}</span>
             </div>
             <div>
               {r.youtubeLink && (

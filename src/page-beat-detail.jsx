@@ -479,11 +479,11 @@ function UdgivelsesListe({ beat, jobs, runs = [], inQueue, queuePosition, onNav,
     date: beat.uploadDate || '',
     youtubeTitle: beat.title || '',
     artist: (window.getArtistName ? window.getArtistName(beat.artist) : '') || '',
-    songname: '',
+    songname: beat.title || '',
     youtubeLink: beat.youtube || '',
     uploadToYoutube: beat.uploadDate || '',
     fileFolder: folderFromPath(beat.filePath || ''),
-  }]).filter((u) => u.date || u.youtubeTitle || u.youtubeLink || u.fileFolder || u.uploadToYoutube);
+  }]).filter((u) => u.songname || u.artist || u.youtubeLink || u.uploadToYoutube || beat.created);
 
   const saveManual = async () => {
     const v = manualYt.trim();
@@ -527,38 +527,35 @@ function UdgivelsesListe({ beat, jobs, runs = [], inQueue, queuePosition, onNav,
         </div>
       )}
 
-      {/* Udgivet (run log table, falls back to beat data) — under the queue position */}
+      {/* Udgivet (run log table, falls back to beat data) — aligned with the queue record */}
       {udgivelser.map((r, i) => {
         const last = i === udgivelser.length - 1 && !savedManualYt && !jobs.length && !showManualInput;
-        const iconBtn = {
-          width:32, height:32, borderRadius:6, color:'var(--text-3)', flexShrink:0,
-          border:'1px solid var(--border-strong)', background:'transparent',
-          display:'inline-flex', alignItems:'center', justifyContent:'center', cursor:'pointer'
-        };
+        const created = beat.created ? new Date(beat.created).toLocaleString('da-DK') : '—';
+        const ytUp = r.uploadToYoutube ? window.fmtDate(r.uploadToYoutube) : '—';
         return (
           <div key={r.id} style={{
-            display:'flex', alignItems:'center', gap:14,
-            padding:'14px 20px',
-            borderBottom: last ? 'none' : '1px solid var(--border)'
+            display:'grid', gridTemplateColumns:'120px 1fr auto',
+            alignItems:'center', padding:'16px 20px',
+            borderBottom: last ? 'none' : '1px solid var(--border)',
+            background:'rgba(46,204,113,.05)'
           }}>
-            <div style={{ display:'flex', alignItems:'center', gap:10, flexShrink:0 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
               <span style={{ display:'inline-flex', width:8, height:8, borderRadius:'50%', background:'var(--green)', boxShadow:'0 0 0 4px rgba(46,204,113,.15)' }}></span>
               <span style={{fontSize:13, fontWeight:600, color:'#4cd787'}}>UDGIVET</span>
             </div>
-            <span style={{ fontSize:13, fontWeight:600, whiteSpace:'nowrap', flexShrink:0 }}>{r.date ? window.fmtDate(r.date) : '—'}</span>
-            <span title={r.youtubeTitle} style={{ fontSize:13, color:'var(--text-2)', flex:1, minWidth:50, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{r.youtubeTitle || '—'}</span>
-            <span style={{ fontSize:13, color:'var(--text-3)', whiteSpace:'nowrap', flexShrink:0 }}>{[r.artist, r.songname].filter(Boolean).join(' · ') || '—'}</span>
-            <span style={{ fontSize:12, color:'var(--text-3)', whiteSpace:'nowrap', flexShrink:0 }}>YT {r.uploadToYoutube ? window.fmtDate(r.uploadToYoutube) : '—'}</span>
-            <div style={{ display:'flex', gap:6, flexShrink:0 }}>
-              {r.fileFolder && (
-                <button title="Åbn mappe" onClick={() => window.open(r.fileFolder, '_blank', 'noopener')} style={iconBtn}
-                  onMouseEnter={e=>{e.currentTarget.style.background='var(--bg-hover)';e.currentTarget.style.color='var(--text)'}}
-                  onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='var(--text-3)'}}>
-                  <I.folder width={15} height={15} />
-                </button>
-              )}
+            <div style={{ display:'flex', alignItems:'center', gap:18, minWidth:0, flexWrap:'wrap' }}>
+              <span style={{ fontSize:14, fontWeight:600, whiteSpace:'nowrap' }}>{r.songname || beat.title || '—'}</span>
+              <span style={{ fontSize:13, color:'var(--text-2)', whiteSpace:'nowrap' }}>{r.artist || '—'}</span>
+              <span style={{ fontSize:12, color:'var(--text-3)', whiteSpace:'nowrap' }}>Tilføjet: {created}</span>
+              <span style={{ fontSize:12, color:'var(--text-3)', whiteSpace:'nowrap' }}>Tilføjet til YouTube: {ytUp}</span>
+            </div>
+            <div>
               {r.youtubeLink && (
-                <button title="Åbn video" onClick={() => window.open(r.youtubeLink, '_blank', 'noopener')} style={iconBtn}
+                <button title="Åbn video" onClick={() => window.open(r.youtubeLink, '_blank', 'noopener')} style={{
+                  width:32, height:32, borderRadius:6, color:'var(--text-3)',
+                  border:'1px solid var(--border-strong)', background:'transparent',
+                  display:'inline-flex', alignItems:'center', justifyContent:'center', cursor:'pointer'
+                }}
                   onMouseEnter={e=>{e.currentTarget.style.background='var(--bg-hover)';e.currentTarget.style.color='#ff5252'}}
                   onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='var(--text-3)'}}>
                   <I.yt width={15} height={15} />

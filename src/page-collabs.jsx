@@ -3,10 +3,35 @@
 // "create new"). Clicking one opens a detail view that reuses the
 // Beats list scoped to that collab.
 
+function SortTh({ label, col, sortBy, sortDir, setSort, align }) {
+  const I = window.Icons;
+  const active = sortBy === col;
+  return (
+    <button onClick={() => setSort(col)} style={{
+      display:'inline-flex', alignItems:'center', gap:5,
+      fontSize:11, fontWeight:700, color: active ? 'var(--text)' : 'var(--text-3)',
+      textTransform:'uppercase', letterSpacing:'.08em', padding:0,
+      background:'transparent', cursor:'pointer', whiteSpace:'nowrap',
+      justifyContent: align === 'right' ? 'flex-end' : 'flex-start', width:'100%'
+    }}>
+      <span>{label}</span>
+      <span style={{display:'inline-flex', opacity: active ? 1 : .4}}>
+        {active && sortDir === 'asc' ? <I.chevUp width={12} height={12} /> : <I.chevDown width={12} height={12} />}
+      </span>
+    </button>
+  );
+}
+
 function CollabsPage({ onOpenCollab }) {
   const I = window.Icons;
   const [search, setSearch] = React.useState('');
-  const [view, setView] = React.useState('gallery'); // gallery | list
+  const [view, setView] = React.useState('list'); // gallery | list
+  const [sortBy, setSortBy] = React.useState('name'); // name | count
+  const [sortDir, setSortDir] = React.useState('asc');
+  const setSort = (c) => {
+    if (sortBy === c) setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+    else { setSortBy(c); setSortDir('asc'); }
+  };
 
   const collabs = React.useMemo(() => {
     const map = {};
@@ -20,6 +45,13 @@ function CollabsPage({ onOpenCollab }) {
   }, []);
 
   const filtered = collabs.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
+  const sorted = [...filtered].sort((a, b) => {
+    const av = sortBy === 'count' ? a.count : a.name.toLowerCase();
+    const bv = sortBy === 'count' ? b.count : b.name.toLowerCase();
+    if (av < bv) return sortDir === 'asc' ? -1 : 1;
+    if (av > bv) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
 
   return (
     <div>
@@ -41,13 +73,13 @@ function CollabsPage({ onOpenCollab }) {
             display:'grid', gridTemplateColumns:'minmax(220px, 2fr) 160px', gap:16,
             alignItems:'center', padding:'14px 20px', borderBottom:'1px solid var(--border)', background:'var(--bg-1)'
           }}>
-            <span style={{fontSize:11, fontWeight:700, color:'var(--text-3)', textTransform:'uppercase', letterSpacing:'.08em'}}>Navn</span>
-            <span style={{fontSize:11, fontWeight:700, color:'var(--text-3)', textTransform:'uppercase', letterSpacing:'.08em', textAlign:'right'}}>Antal beats</span>
+            <SortTh label="Navn" col="name" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
+            <SortTh label="Antal beats" col="count" sortBy={sortBy} sortDir={sortDir} setSort={setSort} align="right" />
           </div>
           {filtered.length === 0 && (
             <div style={{padding:'48px', textAlign:'center', color:'var(--text-3)', fontSize:14}}>Ingen collabs matcher søgningen.</div>
           )}
-          {filtered.map((c, idx) => (
+          {sorted.map((c, idx) => (
             <div key={c.name} onClick={() => onOpenCollab(c.name)} style={{
               display:'grid', gridTemplateColumns:'minmax(220px, 2fr) 160px', gap:16,
               alignItems:'center', padding:'14px 20px',
@@ -69,7 +101,7 @@ function CollabsPage({ onOpenCollab }) {
         <div style={{
           display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(240px, 1fr))', gap:16
         }}>
-          {filtered.map(c => (
+          {sorted.map(c => (
             <button key={c.name} onClick={() => onOpenCollab(c.name)} style={{
               display:'flex', flexDirection:'column', textAlign:'left',
               background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:10,

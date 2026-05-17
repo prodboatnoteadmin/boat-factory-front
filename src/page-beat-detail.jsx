@@ -493,28 +493,6 @@ function UdgivelsesListe({ beat, jobs, runs = [], inQueue, queuePosition, onNav,
         </div>
       </div>
 
-      {/* Udgivet på YouTube */}
-      {beat.uploadDate && (
-        <div style={{
-          display:'grid', gridTemplateColumns:'120px 1fr auto',
-          alignItems:'center', padding:'16px 20px',
-          borderBottom:'1px solid var(--border)',
-          background:'rgba(46,204,113,.05)'
-        }}>
-          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <span style={{ display:'inline-flex', width:8, height:8, borderRadius:'50%', background:'var(--green)', boxShadow:'0 0 0 4px rgba(46,204,113,.15)' }}></span>
-            <span style={{fontSize:13, fontWeight:600, color:'#4cd787'}}>UDGIVET</span>
-          </div>
-          <div style={{minWidth:0}}>
-            <div style={{ fontSize:14, fontWeight:600 }}>Udgivet på YouTube</div>
-            <div style={{ fontSize:12, color:'var(--text-3)', marginTop:2 }}>{window.fmtDate(beat.uploadDate)}</div>
-          </div>
-          {beat.youtube && (
-            <window.Btn size="sm" onClick={() => window.open(beat.youtube, '_blank', 'noopener')}>Åbn video</window.Btn>
-          )}
-        </div>
-      )}
-
       {/* Queue entry first if applicable */}
       {inQueue && (
         <div style={{
@@ -535,7 +513,7 @@ function UdgivelsesListe({ beat, jobs, runs = [], inQueue, queuePosition, onNav,
         </div>
       )}
 
-      {/* Kørsler (run log) — single row, shown under the queue position */}
+      {/* Udgivet (run log table) — single row, shown under the queue position */}
       {runs.map((r, i) => {
         const last = i === runs.length - 1 && !savedManualYt && !jobs.length && !showManualInput;
         const iconBtn = {
@@ -550,8 +528,8 @@ function UdgivelsesListe({ beat, jobs, runs = [], inQueue, queuePosition, onNav,
             borderBottom: last ? 'none' : '1px solid var(--border)'
           }}>
             <div style={{ display:'flex', alignItems:'center', gap:10, flexShrink:0 }}>
-              <span style={{ display:'inline-flex', width:8, height:8, borderRadius:'50%', background:'var(--blue)', boxShadow:'0 0 0 4px rgba(74,144,217,.15)' }}></span>
-              <span style={{fontSize:13, fontWeight:600, color:'#7ab2ea'}}>KØRSEL</span>
+              <span style={{ display:'inline-flex', width:8, height:8, borderRadius:'50%', background:'var(--green)', boxShadow:'0 0 0 4px rgba(46,204,113,.15)' }}></span>
+              <span style={{fontSize:13, fontWeight:600, color:'#4cd787'}}>UDGIVET</span>
             </div>
             <span style={{ fontSize:13, fontWeight:600, whiteSpace:'nowrap', flexShrink:0 }}>{r.date ? window.fmtDate(r.date) : '—'}</span>
             <span title={r.youtubeTitle} style={{ fontSize:13, color:'var(--text-2)', flex:1, minWidth:50, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{r.youtubeTitle || '—'}</span>
@@ -619,7 +597,7 @@ function UdgivelsesListe({ beat, jobs, runs = [], inQueue, queuePosition, onNav,
       {/* Jobs */}
       {runs.length === 0 && jobs.length === 0 && !inQueue && !savedManualYt && !showManualInput && (
         <div style={{ padding:'40px 20px', textAlign:'center', color:'var(--text-3)', fontSize:14 }}>
-          Ingen kørsler endnu for dette beat.
+          Ingen udgivelser registreret for dette beat.
         </div>
       )}
       {jobs.map((job, idx) => (

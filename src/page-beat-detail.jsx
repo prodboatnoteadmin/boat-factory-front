@@ -494,6 +494,28 @@ function UdgivelsesListe({ beat, jobs, inQueue, queuePosition, onNav, onSeeInQue
         </div>
       </div>
 
+      {/* Udgivet på YouTube */}
+      {beat.uploadDate && (
+        <div style={{
+          display:'grid', gridTemplateColumns:'120px 1fr auto',
+          alignItems:'center', padding:'16px 20px',
+          borderBottom:'1px solid var(--border)',
+          background:'rgba(46,204,113,.05)'
+        }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+            <span style={{ display:'inline-flex', width:8, height:8, borderRadius:'50%', background:'var(--green)', boxShadow:'0 0 0 4px rgba(46,204,113,.15)' }}></span>
+            <span style={{fontSize:13, fontWeight:600, color:'#4cd787'}}>UDGIVET</span>
+          </div>
+          <div style={{minWidth:0}}>
+            <div style={{ fontSize:14, fontWeight:600 }}>Udgivet på YouTube</div>
+            <div style={{ fontSize:12, color:'var(--text-3)', marginTop:2 }}>{window.fmtDate(beat.uploadDate)}</div>
+          </div>
+          {beat.youtube && (
+            <window.Btn size="sm" onClick={() => window.open(beat.youtube, '_blank', 'noopener')}>Åbn video</window.Btn>
+          )}
+        </div>
+      )}
+
       {/* Queue entry first if applicable */}
       {inQueue && (
         <div style={{

@@ -107,6 +107,10 @@ function App() {
   const openBeat = (id) => navigate('/beats/' + beatSlug(id));
   const openArtist = (id) => navigate('/artists/' + artistSlug(id));
   const openCollab = (name) => navigate('/collabs/' + slugify(name));
+  const seeInQueue = (beatId) => navigate('/queue?b=' + encodeURIComponent(beatId));
+  const focusBeatId = route.page === 'queue'
+    ? new URLSearchParams(location.search).get('b')
+    : null;
   const goBack = () => navigate(-1);
   const openNewBeat = () => { setModalBeatId(null); setModalOpen(true); };
   const openEditBeat = (id) => { setModalBeatId(id); setModalOpen(true); };
@@ -180,7 +184,8 @@ function App() {
       break;
     case 'beat-detail':
       pageEl = <window.BeatDetailPage beatId={route.beatId} onBack={goBack} onNav={nav}
-                  onOpenArtist={openArtist} onEdit={() => openEditBeat(route.beatId)}
+                  onOpenArtist={openArtist} onOpenCollab={openCollab} onSeeInQueue={seeInQueue}
+                  onEdit={() => openEditBeat(route.beatId)}
                   onDelete={() => deleteBeat(route.beatId)}
                   queueIds={queueIds}
                   onAddToQueue={(id) => handleBulkAddToQueue([id])} />;
@@ -194,7 +199,8 @@ function App() {
     case 'queue':
       pageEl = <window.PublishQueuePage onOpenBeat={openBeat}
                   queueIds={queueIds} setQueueIds={setQueueIds}
-                  pendingIds={pendingIds} setPendingIds={setPendingIds} />;
+                  pendingIds={pendingIds} setPendingIds={setPendingIds}
+                  focusBeatId={focusBeatId} />;
       break;
     case 'collabs':
       pageEl = <window.CollabsPage onOpenCollab={openCollab} />;

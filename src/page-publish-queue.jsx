@@ -28,7 +28,7 @@ function QSort({ label, col, sortBy, sortDir, setSort, align }) {
   );
 }
 
-function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPendingIds }) {
+function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPendingIds, focusBeatId }) {
   const I = window.Icons;
   const [search, setSearch] = React.useState('');
   const [artistFilter, setArtistFilter] = React.useState('');
@@ -36,6 +36,7 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
   const [dragOverId, setDragOverId] = React.useState(null);
   const [confirmRemove, setConfirmRemove] = React.useState(null);
   const [qShown, setQShown] = React.useState(20);
+  const [highlightId, setHighlightId] = React.useState(null);
   const [sortBy, setSortBy] = React.useState('position');
   const [sortDir, setSortDir] = React.useState('asc');
   const setSort = (col) => {
@@ -84,6 +85,22 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
     io.observe(el);
     return () => io.disconnect();
   }, [qShown, visible.length]);
+
+  // When arriving from a beat ("Se i kø"), reveal + scroll to + highlight it.
+  React.useEffect(() => {
+    if (!focusBeatId) return;
+    const idx = visible.findIndex(b => b.id === focusBeatId);
+    if (idx === -1) return;
+    setQShown(s => Math.max(s, idx + 1));
+    setHighlightId(focusBeatId);
+    const t1 = setTimeout(() => {
+      const el = document.getElementById('q-' + focusBeatId);
+      if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }, 150);
+    const t2 = setTimeout(() => setHighlightId(null), 2800);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusBeatId]);
 
   const handleDragStart = (id) => setDraggingId(id);
   const handleDragOver = (e, id) => { e.preventDefault(); setDragOverId(id); };
@@ -164,6 +181,7 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
             const isDragTarget = dragOverId === b.id && draggingId !== b.id;
             return (
               <div key={b.id}
+                id={'q-' + b.id}
                 draggable
                 onDragStart={() => handleDragStart(b.id)}
                 onDragOver={(e) => handleDragOver(e, b.id)}
@@ -174,13 +192,13 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
                   display:'grid', gridTemplateColumns: cols, gap:16,
                   alignItems:'center', padding:'14px 20px',
                   borderTop: vIdx === 0 ? 'none' : '1px solid var(--border)',
-                  background: isDragTarget ? 'rgba(74,144,217,.08)' : 'transparent',
+                  background: b.id === highlightId ? 'rgba(74,144,217,.20)' : (isDragTarget ? 'rgba(74,144,217,.08)' : 'transparent'),
                   opacity: draggingId === b.id ? 0.45 : 1,
                   transition:'background .12s', cursor:'pointer', color:'var(--text)',
                   minWidth: MIN_W
                 }}
-                onMouseEnter={e => { if (!isDragTarget) e.currentTarget.style.background='var(--bg-hover)'; }}
-                onMouseLeave={e => { if (!isDragTarget) e.currentTarget.style.background='transparent'; }}
+                onMouseEnter={e => { if (!isDragTarget && b.id !== highlightId) e.currentTarget.style.background='var(--bg-hover)'; }}
+                onMouseLeave={e => { if (!isDragTarget) e.currentTarget.style.background = b.id === highlightId ? 'rgba(74,144,217,.20)' : 'transparent'; }}
               >
                 <span className="mono" style={{ fontSize:13, fontWeight:700, color: pos < 3 ? 'var(--text)' : 'var(--text-3)' }}>#{pos + 1}</span>
                 <span onClick={(e) => e.stopPropagation()} title="Træk for at omarrangere"

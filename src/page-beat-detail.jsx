@@ -1,5 +1,5 @@
 // Beat detail page — stamdata + jobs history + queue status
-function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete, queueIds = [], onAddToQueue }) {
+function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete, onSeeInQueue, onOpenCollab, queueIds = [], onAddToQueue }) {
   const I = window.Icons;
   const beat = window.DATA.BEATS.find(b => b.id === beatId) || window.DATA.BEATS[0];
   const artist = window.DATA.ARTISTS.find(a => a.id === beat.artist);
@@ -101,7 +101,7 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
           {beat.status === 'processing' ? (
             <div style={{ width:170 }} title="Behandler…"><window.ProgressBar /></div>
           ) : inQueue ? (
-            <window.Btn kind="secondary" icon={<I.check />} onClick={() => onNav('queue')}>I kø #{queuePosition + 1}</window.Btn>
+            <window.Btn kind="secondary" icon={<I.check />} onClick={() => (onSeeInQueue ? onSeeInQueue(beat.id) : onNav('queue'))}>I kø #{queuePosition + 1}</window.Btn>
           ) : (
             <window.Btn kind="primary" icon={<I.plus />} onClick={() => onAddToQueue && onAddToQueue(beat.id)}>Tilføj til kø</window.Btn>
           )}
@@ -150,7 +150,7 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
                 </div>
               );
             }
-            return <YouTubePlaceholder beat={beat} inQueue={inQueue} queuePosition={queuePosition} hasJobs={jobs.length > 0} onNav={onNav} />;
+            return <YouTubePlaceholder beat={beat} inQueue={inQueue} queuePosition={queuePosition} hasJobs={jobs.length > 0} onNav={onNav} onSeeInQueue={onSeeInQueue} />;
           })()}
 
         </div>
@@ -221,7 +221,9 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
               <div>
                 <div style={{fontSize:11, color:'var(--text-3)', marginBottom:6, letterSpacing:'.06em', textTransform:'uppercase'}}>Primær collab</div>
                 {collab
-                  ? <window.Chip accent="blue">{collab}</window.Chip>
+                  ? <button onClick={() => onOpenCollab && onOpenCollab(collab)} title="Se collab" style={{ background:'transparent', padding:0, cursor:'pointer' }}>
+                      <window.Chip accent="blue">{collab}</window.Chip>
+                    </button>
                   : <span style={{fontSize:13, color:'var(--text-3)'}}>Ingen collab</span>}
               </div>
               <div>
@@ -244,6 +246,7 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
           inQueue={inQueue}
           queuePosition={queuePosition}
           onNav={onNav}
+          onSeeInQueue={onSeeInQueue}
           manualYt={manualYt}
           setManualYt={setManualYt}
           savedManualYt={savedManualYt}
@@ -328,7 +331,7 @@ function DetailRow({ label, value, copyable, link }) {
   );
 }
 
-function YouTubePlaceholder({ beat, inQueue, queuePosition, hasJobs, onNav }) {
+function YouTubePlaceholder({ beat, inQueue, queuePosition, hasJobs, onNav, onSeeInQueue }) {
   const I = window.Icons;
   // Determine state message
   let badge, headline, sub;
@@ -392,7 +395,7 @@ function YouTubePlaceholder({ beat, inQueue, queuePosition, hasJobs, onNav }) {
           <window.Btn kind="blue" size="sm" icon={<I.plus />} onClick={() => onNav('queue')}>Tilføj til kø</window.Btn>
         )}
         {inQueue && (
-          <window.Btn kind="secondary" size="sm" onClick={() => onNav('queue')}>Se kø-status</window.Btn>
+          <window.Btn kind="secondary" size="sm" onClick={() => (onSeeInQueue ? onSeeInQueue(beat.id) : onNav('queue'))}>Se kø-status</window.Btn>
         )}
       </div>
 
@@ -418,7 +421,7 @@ function Stat({ label, value, mono }) {
   );
 }
 
-function UdgivelsesListe({ beat, jobs, inQueue, queuePosition, onNav, manualYt, setManualYt, savedManualYt, setSavedManualYt, hasDetectedYt }) {
+function UdgivelsesListe({ beat, jobs, inQueue, queuePosition, onNav, onSeeInQueue, manualYt, setManualYt, savedManualYt, setSavedManualYt, hasDetectedYt }) {
   const I = window.Icons;
   const [expanded, setExpanded] = React.useState(null);
   const showManualInput = !hasDetectedYt && !savedManualYt;
@@ -463,7 +466,7 @@ function UdgivelsesListe({ beat, jobs, inQueue, queuePosition, onNav, manualYt, 
             <div style={{ fontSize:14, fontWeight:600 }}>Position #{queuePosition + 1}</div>
             <div style={{ fontSize:12, color:'var(--text-3)', marginTop:2 }}>Venter på render</div>
           </div>
-          <window.Btn size="sm" onClick={() => onNav('queue')}>Se i kø</window.Btn>
+          <window.Btn size="sm" onClick={() => (onSeeInQueue ? onSeeInQueue(beat.id) : onNav('queue'))}>Se i kø</window.Btn>
         </div>
       )}
 

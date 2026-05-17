@@ -67,6 +67,23 @@ const mapBeat = (r) => ({
   queuePosition: r.queue_position == null ? undefined : r.queue_position,
 });
 
+const ytVid = (u) => {
+  const m = /(?:v=|youtu\.be\/|\/embed\/|\/shorts\/)([A-Za-z0-9_-]{11})/.exec(u || '');
+  return m ? m[1] : null;
+};
+
+const mapRun = (r) => ({
+  id: r.id,
+  beatId: r.beat_id || '',
+  date: r.date || '',
+  youtubeTitle: r.youtube_title || '',
+  artist: r.artist || '',
+  songname: r.songname || '',
+  youtubeLink: r.youtube_link || '',
+  uploadToYoutube: r.upload_to_youtube || '',
+  fileFolder: r.file_folder || '',
+});
+
 // ---- UI form -> row (real schema) ---------------------------------------
 const uuid = () =>
   (window.crypto && window.crypto.randomUUID
@@ -138,7 +155,15 @@ window.loadData = async function loadData() {
 
   const ARTISTS = (artistsRes.data || []).map(mapArtist);
   const BEATS = (beatsRes.data || []).map(mapBeat);
-  const JOBS = []; // no jobs table in this database
+  const JOBS = []; // legacy "jobs" shape — unused, kept for compatibility
+
+  // beat_run_log is optional: fetched separately so a missing table (before
+  // the SQL is applied) never breaks the rest of the app.
+  let RUNLOG = [];
+  {
+    const runRes = await sb().from('beat_run_log').select('*');
+    if (!runRes.error && Array.isArray(runRes.data)) RUNLOG = runRes.data.map(mapRun);
+  }
 
   const counts = {};
   BEATS.forEach((b) => { if (b.artist) counts[b.artist] = (counts[b.artist] || 0) + 1; });
@@ -148,8 +173,17 @@ window.loadData = async function loadData() {
 
   const beatById = (id) => BEATS.find((b) => b.id === id);
 
-  // No jobs table → publishing history is empty everywhere.
-  window.getBeatJobs = () => [];
+  window.getBeatJobs = () => []; // legacy, unused
+
+  // Runs (kørsler) for a beat: matched by beat_id, or by YouTube video id as
+  // a fallback when the writer only filled youtube_link. Newest first.
+  window.getBeatRuns = (beatId) => {
+    const b = beatById(beatId);
+    const bv = b ? ytVid(b.youtube) : null;
+    return RUNLOG
+      .filter((r) => (r.beatId && r.beatId === beatId) || (bv && ytVid(r.youtubeLink) === bv))
+      .sort((a, c) => String(c.date).localeCompare(String(a.date)));
+  };
   // Surface the beat's own YouTube link so the embed/indicators work.
   window.getFirstYouTubeLink = (beatId) => {
     const b = beatById(beatId);

@@ -15,6 +15,7 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
   const [topUrl, setTopUrl] = React.useState('');
 
   const jobs = window.getBeatJobs(beat.id);
+  const runs = window.getBeatRuns ? window.getBeatRuns(beat.id) : [];
   const detectedYt = window.getFirstYouTubeLink(beat.id);
   const youtubeLink = savedManualYt || detectedYt;
   const queuePosition = queueIds.indexOf(beat.id);
@@ -284,6 +285,7 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
         <UdgivelsesListe
           beat={beat}
           jobs={jobs}
+          runs={runs}
           inQueue={inQueue}
           queuePosition={queuePosition}
           onNav={onNav}
@@ -462,7 +464,7 @@ function Stat({ label, value, mono }) {
   );
 }
 
-function UdgivelsesListe({ beat, jobs, inQueue, queuePosition, onNav, onSeeInQueue, manualYt, setManualYt, savedManualYt, setSavedManualYt, hasDetectedYt }) {
+function UdgivelsesListe({ beat, jobs, runs = [], inQueue, queuePosition, onNav, onSeeInQueue, manualYt, setManualYt, savedManualYt, setSavedManualYt, hasDetectedYt }) {
   const I = window.Icons;
   const [expanded, setExpanded] = React.useState(null);
   const [editing, setEditing] = React.useState(false);
@@ -489,7 +491,7 @@ function UdgivelsesListe({ beat, jobs, inQueue, queuePosition, onNav, onSeeInQue
         <div>
           <h3 style={{margin:0, fontSize:13, fontWeight:600, color:'var(--text-3)', textTransform:'uppercase', letterSpacing:'.08em'}}>Udgivelses-historik</h3>
           <p style={{margin:'4px 0 0', fontSize:12, color:'var(--text-3)'}}>
-            {jobs.length} {jobs.length === 1 ? 'job' : 'jobs'} udført{inQueue ? ' · I kø lige nu' : ''}
+            {runs.length} {runs.length === 1 ? 'kørsel' : 'kørsler'}{inQueue ? ' · I kø lige nu' : ''}
           </p>
         </div>
       </div>
@@ -521,7 +523,7 @@ function UdgivelsesListe({ beat, jobs, inQueue, queuePosition, onNav, onSeeInQue
         <div style={{
           display:'grid', gridTemplateColumns:'120px 1fr auto',
           alignItems:'center', padding:'16px 20px',
-          borderBottom: (jobs.length || showManualInput || savedManualYt) ? '1px solid var(--border)' : 'none',
+          borderBottom: (runs.length || jobs.length || showManualInput || savedManualYt) ? '1px solid var(--border)' : 'none',
           background:'rgba(243,156,18,.05)'
         }}>
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
@@ -535,6 +537,44 @@ function UdgivelsesListe({ beat, jobs, inQueue, queuePosition, onNav, onSeeInQue
           <window.Btn size="sm" onClick={() => (onSeeInQueue ? onSeeInQueue(beat.id) : onNav('queue'))}>Se i kø</window.Btn>
         </div>
       )}
+
+      {/* Kørsler (run log) — shown under the queue task */}
+      {runs.map((r, i) => {
+        const last = i === runs.length - 1 && !savedManualYt && !jobs.length && !showManualInput;
+        const sub = [r.artist, r.songname].filter(Boolean).join(' · ');
+        return (
+          <div key={r.id} style={{
+            display:'grid', gridTemplateColumns:'120px 1fr auto',
+            alignItems:'center', padding:'16px 20px',
+            borderBottom: last ? 'none' : '1px solid var(--border)'
+          }}>
+            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+              <span style={{ display:'inline-flex', width:8, height:8, borderRadius:'50%', background:'var(--blue)', boxShadow:'0 0 0 4px rgba(74,144,217,.15)' }}></span>
+              <span style={{fontSize:13, fontWeight:600, color:'#7ab2ea'}}>KØRSEL</span>
+            </div>
+            <div style={{minWidth:0}}>
+              <div style={{ fontSize:14, fontWeight:600 }}>{r.date ? window.fmtDate(r.date) : 'Kørsel'}</div>
+              <div style={{ fontSize:12, color:'var(--text-3)', marginTop:2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+                {r.youtubeTitle || sub || '—'}{r.uploadToYoutube ? ` · YouTube ${window.fmtDate(r.uploadToYoutube)}` : ''}
+              </div>
+            </div>
+            <div style={{ display:'flex', gap:8 }}>
+              {r.fileFolder && (
+                <button onClick={() => window.open(r.fileFolder, '_blank', 'noopener')} title="Åbn mappe" style={{
+                  height:34, padding:'0 12px', borderRadius:6, fontSize:13, fontWeight:600, color:'var(--text-2)',
+                  border:'1px solid var(--border-strong)', background:'transparent',
+                  display:'inline-flex', alignItems:'center'
+                }}
+                  onMouseEnter={e=>{e.currentTarget.style.background='var(--bg-hover)';e.currentTarget.style.color='var(--text)'}}
+                  onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='var(--text-2)'}}>
+                  Mappe
+                </button>
+              )}
+              {r.youtubeLink && <window.Btn size="sm" onClick={() => window.open(r.youtubeLink, '_blank', 'noopener')}>Åbn video</window.Btn>}
+            </div>
+          </div>
+        );
+      })}
 
       {/* Manually saved YT link entry */}
       {savedManualYt && (
@@ -576,9 +616,9 @@ function UdgivelsesListe({ beat, jobs, inQueue, queuePosition, onNav, onSeeInQue
       )}
 
       {/* Jobs */}
-      {jobs.length === 0 && !inQueue && !savedManualYt && !showManualInput && (
+      {runs.length === 0 && jobs.length === 0 && !inQueue && !savedManualYt && !showManualInput && (
         <div style={{ padding:'40px 20px', textAlign:'center', color:'var(--text-3)', fontSize:14 }}>
-          Dette beat er endnu ikke kørt gennem nogen jobs.
+          Ingen kørsler endnu for dette beat.
         </div>
       )}
       {jobs.map((job, idx) => (

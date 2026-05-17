@@ -21,10 +21,10 @@ function Sidebar({ current, onNav, onLogout }) {
         background:'transparent', width:'100%', textAlign:'left', cursor:'pointer'
       }}>
         <div style={{
-          width:34, height:34, borderRadius:8, background:'var(--red)',
+          width:34, height:34, borderRadius:8, background:'#5C6FC9',
           display:'flex', alignItems:'center', justifyContent:'center',
           fontWeight:800, color:'#fff', fontSize:18, letterSpacing:'-.02em',
-          boxShadow:'0 4px 16px rgba(232,72,85,.35)'
+          boxShadow:'0 4px 16px rgba(92,111,201,.35)'
         }}>B</div>
         <div style={{display:'flex', flexDirection:'column', lineHeight:1.1}}>
           <span style={{fontWeight:700, fontSize:17, letterSpacing:'-.01em'}}>Beat Manager</span>

@@ -52,9 +52,9 @@ function LoginPage({ onLogin }) {
       }}>
         <div style={{display:'flex', alignItems:'center', gap:12, marginBottom:30}}>
           <div style={{
-            width:44, height:44, borderRadius:10, background:'var(--red)',
+            width:44, height:44, borderRadius:10, background:'#5C6FC9',
             display:'flex', alignItems:'center', justifyContent:'center',
-            fontWeight:800, color:'#fff', fontSize:22, boxShadow:'0 6px 20px rgba(232,72,85,.4)'
+            fontWeight:800, color:'#fff', fontSize:22, boxShadow:'0 6px 20px rgba(92,111,201,.4)'
           }}>B</div>
           <div>
             <div style={{fontWeight:700, fontSize:20, letterSpacing:'-.01em'}}>Beat Manager</div>

@@ -4,8 +4,8 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue, collab, embedded }) {
   const [search, setSearch] = React.useState('');
   const [artistFilter, setArtistFilter] = React.useState('');
   const [statusFilter, setStatusFilter] = React.useState('');
-  const [sortBy, setSortBy] = React.useState('created');
-  const [sortDir, setSortDir] = React.useState('desc');
+  const [sortBy, setSortBy] = React.useState('title');
+  const [sortDir, setSortDir] = React.useState('asc');
   const [selected, setSelected] = React.useState(new Set());
   const [shown, setShown] = React.useState(20);
   const moreRef = React.useRef(null);

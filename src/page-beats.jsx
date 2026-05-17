@@ -108,7 +108,7 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue, collab, embedded }) {
           <SortHead label="Key" col="key" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
           <SortHead label="Årstal" col="year" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
           <SortHead label="Position" col="queuePosition" sortBy={sortBy} sortDir={sortDir} setSort={setSort} align="right" />
-          <SortHead label="Udgivet" col="udgivet" sortBy={sortBy} sortDir={sortDir} setSort={setSort} align="right" />
+          <SortHead label="Udgivet på YouTube" col="udgivet" sortBy={sortBy} sortDir={sortDir} setSort={setSort} align="right" />
           <SortHead label="Tilføjet" col="created" sortBy={sortBy} sortDir={sortDir} setSort={setSort} align="right" />
         </div>
         {filtered.length === 0 && (

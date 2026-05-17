@@ -9,6 +9,25 @@ function QHead({ children }) {
   }}>{children}</span>;
 }
 
+function QSort({ label, col, sortBy, sortDir, setSort, align }) {
+  const I = window.Icons;
+  const active = sortBy === col;
+  return (
+    <button onClick={() => setSort(col)} style={{
+      display:'inline-flex', alignItems:'center', gap:5,
+      fontSize:11, fontWeight:700, color: active ? 'var(--text)' : 'var(--text-3)',
+      textTransform:'uppercase', letterSpacing:'.08em', padding:0,
+      background:'transparent', cursor:'pointer', whiteSpace:'nowrap',
+      justifyContent: align === 'right' ? 'flex-end' : 'flex-start', width:'100%'
+    }}>
+      <span>{label}</span>
+      <span style={{display:'inline-flex', opacity: active ? 1 : .4}}>
+        {active && sortDir === 'asc' ? <I.chevUp width={12} height={12} /> : <I.chevDown width={12} height={12} />}
+      </span>
+    </button>
+  );
+}
+
 function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPendingIds }) {
   const I = window.Icons;
   const [search, setSearch] = React.useState('');
@@ -17,6 +36,12 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
   const [dragOverId, setDragOverId] = React.useState(null);
   const [confirmRemove, setConfirmRemove] = React.useState(null);
   const [qShown, setQShown] = React.useState(20);
+  const [sortBy, setSortBy] = React.useState('position');
+  const [sortDir, setSortDir] = React.useState('asc');
+  const setSort = (col) => {
+    if (sortBy === col) setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+    else { setSortBy(col); setSortDir('asc'); }
+  };
   const moreRef = React.useRef(null);
 
   // Same column metrics as the Beats list (40/2fr/1.2fr/70/80/70) plus
@@ -28,14 +53,27 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
     .map(id => window.DATA.BEATS.find(b => b.id === id))
     .filter(Boolean);
 
-  const visible = queueBeats.filter(b => {
-    if (search && !b.title.toLowerCase().includes(search.toLowerCase())) return false;
-    if (artistFilter && b.artist !== artistFilter) return false;
-    return true;
-  });
+  const posOf = (id) => queueIds.indexOf(id);
+  const visible = queueBeats
+    .filter(b => {
+      if (search && !b.title.toLowerCase().includes(search.toLowerCase())) return false;
+      if (artistFilter && b.artist !== artistFilter) return false;
+      return true;
+    })
+    .slice()
+    .sort((a, b) => {
+      let av, bv;
+      if (sortBy === 'position') { av = posOf(a.id); bv = posOf(b.id); }
+      else if (sortBy === 'artist') { av = window.getArtistName(a.artist); bv = window.getArtistName(b.artist); }
+      else if (sortBy === 'category') { av = a.category || ''; bv = b.category || ''; }
+      else { av = a[sortBy]; bv = b[sortBy]; }
+      if (av < bv) return sortDir === 'asc' ? -1 : 1;
+      if (av > bv) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
 
   // Infinite scroll: 20 at a time, load 20 more when the sentinel shows.
-  React.useEffect(() => { setQShown(20); }, [search, artistFilter]);
+  React.useEffect(() => { setQShown(20); }, [search, artistFilter, sortBy, sortDir]);
   React.useEffect(() => {
     if (qShown >= visible.length) return;
     const el = moreRef.current;
@@ -81,7 +119,7 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
           <window.TextInput value={search} onChange={setSearch} placeholder="Søg efter sangnavn" icon={<I.search />} fullWidth />
         </div>
         <window.Select value={artistFilter} onChange={setArtistFilter} options={[
-          { value:'', label:'Alle artists' },
+          { value:'', label:'Alle artister' },
           ...window.DATA.ARTISTS.map(a => ({ value:a.id, label:a.name }))
         ]} style={{width:180}} />
       </div>
@@ -94,14 +132,14 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
             alignItems:'center', padding:'14px 20px',
             borderBottom:'1px solid var(--border)', background:'var(--bg-1)', minWidth: MIN_W
           }}>
-            <QHead>#</QHead>
+            <QSort label="#" col="position" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
             <QHead></QHead>
-            <QHead>Sangtitel</QHead>
-            <QHead>Artist</QHead>
-            <QHead>BPM</QHead>
-            <QHead>Key</QHead>
-            <QHead>Årstal</QHead>
-            <QHead>Rating</QHead>
+            <QSort label="Sangtitel" col="title" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
+            <QSort label="Artist" col="artist" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
+            <QSort label="BPM" col="bpm" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
+            <QSort label="Key" col="key" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
+            <QSort label="Årstal" col="year" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
+            <QSort label="Rating" col="category" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
             <QHead></QHead>
             <QHead></QHead>
           </div>

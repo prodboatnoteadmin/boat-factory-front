@@ -3,6 +3,7 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
   const I = window.Icons;
   const [search, setSearch] = React.useState('');
   const [artistFilter, setArtistFilter] = React.useState('');
+  const [statusFilter, setStatusFilter] = React.useState('');
   const [sortBy, setSortBy] = React.useState('created');
   const [sortDir, setSortDir] = React.useState('desc');
   const [selected, setSelected] = React.useState(new Set());
@@ -21,6 +22,8 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
     let arr = window.DATA.BEATS.filter(b => {
       if (search && !b.title.toLowerCase().includes(search.toLowerCase())) return false;
       if (artistFilter && b.artist !== artistFilter) return false;
+      if (statusFilter === 'queued' && b.status !== 'pending') return false;
+      if (statusFilter === 'notqueued' && b.status === 'pending') return false;
       return true;
     });
     arr.sort((a, b) => {
@@ -36,7 +39,7 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
       return 0;
     });
     return arr;
-  }, [search, artistFilter, sortBy, sortDir]);
+  }, [search, artistFilter, statusFilter, sortBy, sortDir]);
 
   // Infinite scroll: 20 at a time, load 20 more when the sentinel shows.
   React.useEffect(() => { setShown(20); }, [search, artistFilter, sortBy, sortDir]);
@@ -81,9 +84,14 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
           <window.TextInput value={search} onChange={setSearch} placeholder="Søg efter sangnavn" icon={<I.search />} fullWidth />
         </div>
         <window.Select value={artistFilter} onChange={setArtistFilter} options={[
-          { value:'', label:'Alle artists' },
+          { value:'', label:'Alle artister' },
           ...window.DATA.ARTISTS.map(a => ({ value:a.id, label:a.name }))
         ]} style={{width:180}} />
+        <window.Select value={statusFilter} onChange={setStatusFilter} options={[
+          { value:'', label:'Vis alle' },
+          { value:'notqueued', label:'Ikke i kø' },
+          { value:'queued', label:'I kø' },
+        ]} style={{width:160}} />
       </div>
 
       {/* Table */}

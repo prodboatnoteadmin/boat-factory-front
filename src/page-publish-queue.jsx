@@ -206,13 +206,9 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
                   <I.drag width={15} height={15} />
                 </span>
                 <div style={{display:'flex', alignItems:'center', gap:10, minWidth:0}}>
+                  <window.PlayCell beat={b} size={28} />
                   <span style={{fontWeight:600, fontSize:14, color:'var(--text)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>{b.title}</span>
                   {b.status === 'processing' && <window.ProgressBar style={{ flex:'1 1 50px', minWidth:40, maxWidth:150 }} />}
-                  {postedYt && (
-                    <span title="Postet på YouTube" style={{ display:'inline-flex', color:'#ff2a2a', flexShrink:0 }}>
-                      <I.yt width={14} height={14} />
-                    </span>
-                  )}
                 </div>
                 <div style={{fontSize:13, color:'var(--text-2)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>{window.getArtistName(b.artist)}</div>
                 <div className="mono" style={{fontSize:13, color:'var(--text-2)'}}>{b.bpm}</div>

@@ -295,4 +295,73 @@ function Tip({ label, children, style }) {
   );
 }
 
-Object.assign(window, { Btn, StatusPill, CategoryPill, Chip, AddChip, Card, TextInput, Select, Toggle, PageHeader, ProgressBar, Tip, STATUS_COLORS, STATUS_LABEL, fmtNum, fmtDate, fmtRelative, getArtistName, uiStyles, DropdownMenu });
+// Play icon that opens a YouTube player popup. Renders NOTHING when the
+// beat has no (resolvable) YouTube video — no disabled state.
+function PlayCell({ beat, size = 32 }) {
+  const I = window.Icons;
+  const [open, setOpen] = useState(false);
+  const link = window.getFirstYouTubeLink ? window.getFirstYouTubeLink(beat.id) : (beat.youtube || null);
+  const vid = link && window.ytVideoId ? window.ytVideoId(link) : null;
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+  if (!vid) return null;
+  return (
+    <>
+      <div
+        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+        title="Afspil fra YouTube"
+        style={{
+          width:size, height:size, borderRadius:4, flexShrink:0,
+          background:'linear-gradient(135deg, #2b2b2b, #161616)',
+          display:'flex', alignItems:'center', justifyContent:'center',
+          color:'#fff', cursor:'pointer'
+        }}
+        onMouseEnter={e=>{ e.currentTarget.style.background='linear-gradient(135deg, #3a2030, #1a0d12)'; e.currentTarget.style.color='#ff5252'; }}
+        onMouseLeave={e=>{ e.currentTarget.style.background='linear-gradient(135deg, #2b2b2b, #161616)'; e.currentTarget.style.color='#fff'; }}
+      >
+        <I.play width={Math.round(size * 0.38)} height={Math.round(size * 0.38)} />
+      </div>
+      {open && (
+        <div onClick={(e) => { e.stopPropagation(); setOpen(false); }} style={{
+          position:'fixed', inset:0, zIndex:200, background:'rgba(0,0,0,.75)',
+          backdropFilter:'blur(4px)', display:'flex', alignItems:'center',
+          justifyContent:'center', padding:24
+        }}>
+          <div onClick={(e) => e.stopPropagation()} style={{
+            width:'100%', maxWidth:900, background:'var(--bg-2)',
+            border:'1px solid var(--border-strong)', borderRadius:12, overflow:'hidden',
+            boxShadow:'0 30px 80px rgba(0,0,0,.6)'
+          }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 18px', borderBottom:'1px solid var(--border)' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0 }}>
+                <span style={{ padding:'3px 8px', borderRadius:4, background:'rgba(232,72,85,.95)', color:'#fff', fontSize:10, fontWeight:800, letterSpacing:'.1em', flexShrink:0 }}>YOUTUBE</span>
+                <span style={{ fontSize:14, fontWeight:600, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{beat.title} · {window.getArtistName(beat.artist)}</span>
+              </div>
+              <button onClick={() => setOpen(false)} title="Luk" style={{ padding:8, borderRadius:6, color:'var(--text-3)' }}
+                onMouseEnter={e=>{e.currentTarget.style.background='var(--bg-hover)';e.currentTarget.style.color='var(--text)'}}
+                onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='var(--text-3)'}}>
+                <I.x width={18} height={18} />
+              </button>
+            </div>
+            <div style={{ position:'relative', aspectRatio:'16/9', background:'#000' }}>
+              <iframe
+                src={`https://www.youtube.com/embed/${vid}?autoplay=1`}
+                title={beat.title}
+                style={{ position:'absolute', inset:0, width:'100%', height:'100%', border:0 }}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+Object.assign(window, { Btn, StatusPill, CategoryPill, Chip, AddChip, Card, TextInput, Select, Toggle, PageHeader, ProgressBar, Tip, PlayCell, STATUS_COLORS, STATUS_LABEL, fmtNum, fmtDate, fmtRelative, getArtistName, uiStyles, DropdownMenu });

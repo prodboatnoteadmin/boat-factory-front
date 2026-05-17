@@ -538,39 +538,43 @@ function UdgivelsesListe({ beat, jobs, runs = [], inQueue, queuePosition, onNav,
         </div>
       )}
 
-      {/* Kørsler (run log) — shown under the queue task */}
+      {/* Kørsler (run log) — single row, shown under the queue position */}
       {runs.map((r, i) => {
         const last = i === runs.length - 1 && !savedManualYt && !jobs.length && !showManualInput;
-        const sub = [r.artist, r.songname].filter(Boolean).join(' · ');
+        const iconBtn = {
+          width:32, height:32, borderRadius:6, color:'var(--text-3)', flexShrink:0,
+          border:'1px solid var(--border-strong)', background:'transparent',
+          display:'inline-flex', alignItems:'center', justifyContent:'center', cursor:'pointer'
+        };
         return (
           <div key={r.id} style={{
-            display:'grid', gridTemplateColumns:'120px 1fr auto',
-            alignItems:'center', padding:'16px 20px',
+            display:'flex', alignItems:'center', gap:14,
+            padding:'14px 20px',
             borderBottom: last ? 'none' : '1px solid var(--border)'
           }}>
-            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:10, flexShrink:0 }}>
               <span style={{ display:'inline-flex', width:8, height:8, borderRadius:'50%', background:'var(--blue)', boxShadow:'0 0 0 4px rgba(74,144,217,.15)' }}></span>
               <span style={{fontSize:13, fontWeight:600, color:'#7ab2ea'}}>KØRSEL</span>
             </div>
-            <div style={{minWidth:0}}>
-              <div style={{ fontSize:14, fontWeight:600 }}>{r.date ? window.fmtDate(r.date) : 'Kørsel'}</div>
-              <div style={{ fontSize:12, color:'var(--text-3)', marginTop:2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
-                {r.youtubeTitle || sub || '—'}{r.uploadToYoutube ? ` · YouTube ${window.fmtDate(r.uploadToYoutube)}` : ''}
-              </div>
-            </div>
-            <div style={{ display:'flex', gap:8 }}>
+            <span style={{ fontSize:13, fontWeight:600, whiteSpace:'nowrap', flexShrink:0 }}>{r.date ? window.fmtDate(r.date) : '—'}</span>
+            <span title={r.youtubeTitle} style={{ fontSize:13, color:'var(--text-2)', flex:1, minWidth:50, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{r.youtubeTitle || '—'}</span>
+            <span style={{ fontSize:13, color:'var(--text-3)', whiteSpace:'nowrap', flexShrink:0 }}>{[r.artist, r.songname].filter(Boolean).join(' · ') || '—'}</span>
+            <span style={{ fontSize:12, color:'var(--text-3)', whiteSpace:'nowrap', flexShrink:0 }}>YT {r.uploadToYoutube ? window.fmtDate(r.uploadToYoutube) : '—'}</span>
+            <div style={{ display:'flex', gap:6, flexShrink:0 }}>
               {r.fileFolder && (
-                <button onClick={() => window.open(r.fileFolder, '_blank', 'noopener')} title="Åbn mappe" style={{
-                  height:34, padding:'0 12px', borderRadius:6, fontSize:13, fontWeight:600, color:'var(--text-2)',
-                  border:'1px solid var(--border-strong)', background:'transparent',
-                  display:'inline-flex', alignItems:'center'
-                }}
+                <button title="Åbn mappe" onClick={() => window.open(r.fileFolder, '_blank', 'noopener')} style={iconBtn}
                   onMouseEnter={e=>{e.currentTarget.style.background='var(--bg-hover)';e.currentTarget.style.color='var(--text)'}}
-                  onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='var(--text-2)'}}>
-                  Mappe
+                  onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='var(--text-3)'}}>
+                  <I.folder width={15} height={15} />
                 </button>
               )}
-              {r.youtubeLink && <window.Btn size="sm" onClick={() => window.open(r.youtubeLink, '_blank', 'noopener')}>Åbn video</window.Btn>}
+              {r.youtubeLink && (
+                <button title="Åbn video" onClick={() => window.open(r.youtubeLink, '_blank', 'noopener')} style={iconBtn}
+                  onMouseEnter={e=>{e.currentTarget.style.background='var(--bg-hover)';e.currentTarget.style.color='#ff5252'}}
+                  onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='var(--text-3)'}}>
+                  <I.yt width={15} height={15} />
+                </button>
+              )}
             </div>
           </div>
         );

@@ -490,9 +490,6 @@ function UdgivelsesListe({ beat, jobs, runs = [], inQueue, queuePosition, onNav,
       <div style={{padding:'18px 20px 14px', display:'flex', alignItems:'center', justifyContent:'space-between', borderBottom:'1px solid var(--border)'}}>
         <div>
           <h3 style={{margin:0, fontSize:13, fontWeight:600, color:'var(--text-3)', textTransform:'uppercase', letterSpacing:'.08em'}}>Udgivelses-historik</h3>
-          <p style={{margin:'4px 0 0', fontSize:12, color:'var(--text-3)'}}>
-            {runs.length} {runs.length === 1 ? 'kørsel' : 'kørsler'}{inQueue ? ' · I kø lige nu' : ''}
-          </p>
         </div>
       </div>
 

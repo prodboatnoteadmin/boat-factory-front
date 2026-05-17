@@ -2,6 +2,7 @@
 function ArtistsPage({ onOpenArtist, onNewArtist }) {
   const I = window.Icons;
   const [search, setSearch] = React.useState('');
+  const [view, setView] = React.useState('gallery'); // gallery | list
 
   // Show every artist (incl. newly created ones with 0 beats yet).
   const filtered = window.DATA.ARTISTS.filter(a => a.name.toLowerCase().includes(search.toLowerCase()));
@@ -12,16 +13,51 @@ function ArtistsPage({ onOpenArtist, onNewArtist }) {
         <window.Btn icon={<I.plus />} onClick={onNewArtist}>Ny artist</window.Btn>
       </window.PageHeader>
 
-      <div style={{ display:'flex', gap:10, marginBottom:18 }}>
-        <div style={{flex:1, maxWidth:400}}>
+      <div style={{ display:'flex', gap:10, marginBottom:18, alignItems:'center', flexWrap:'wrap' }}>
+        <div style={{flex:'1 1 300px', minWidth:240}}>
           <window.TextInput value={search} onChange={setSearch} placeholder="Søg artist…" icon={<I.search />} fullWidth />
         </div>
+        <window.Select value={view} onChange={setView} options={[
+          { value:'gallery', label:'Galleri' },
+          { value:'list', label:'Liste' },
+        ]} style={{width:140}} />
       </div>
 
-      <div style={{
-        display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(240px, 1fr))', gap:16
-      }}>
-        {filtered.map(a => (
+      {view === 'list' ? (
+        <div style={{ background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:8, overflow:'hidden' }}>
+          <div style={{
+            display:'grid', gridTemplateColumns:'minmax(220px, 2fr) 160px', gap:16,
+            alignItems:'center', padding:'14px 20px', borderBottom:'1px solid var(--border)', background:'var(--bg-1)'
+          }}>
+            <span style={{fontSize:11, fontWeight:700, color:'var(--text-3)', textTransform:'uppercase', letterSpacing:'.08em'}}>Navn</span>
+            <span style={{fontSize:11, fontWeight:700, color:'var(--text-3)', textTransform:'uppercase', letterSpacing:'.08em', textAlign:'right'}}>Antal beats</span>
+          </div>
+          {filtered.length === 0 && (
+            <div style={{padding:'48px', textAlign:'center', color:'var(--text-3)', fontSize:14}}>Ingen artister matcher søgningen.</div>
+          )}
+          {filtered.map((a, idx) => (
+            <div key={a.id} onClick={() => onOpenArtist(a.id)} style={{
+              display:'grid', gridTemplateColumns:'minmax(220px, 2fr) 160px', gap:16,
+              alignItems:'center', padding:'14px 20px',
+              borderTop: idx === 0 ? 'none' : '1px solid var(--border)',
+              cursor:'pointer', color:'var(--text)', transition:'background .12s'
+            }}
+              onMouseEnter={e => e.currentTarget.style.background='var(--bg-hover)'}
+              onMouseLeave={e => e.currentTarget.style.background='transparent'}
+            >
+              <div style={{display:'flex', alignItems:'center', gap:12, minWidth:0}}>
+                <ArtistAvatar id={a.id} name={a.name} size={32} />
+                <span style={{fontWeight:600, fontSize:14, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>{a.name}</span>
+              </div>
+              <span className="mono" style={{fontSize:13, color:'var(--text-2)', textAlign:'right'}}>{a.beatsCount}</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{
+          display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(240px, 1fr))', gap:16
+        }}>
+          {filtered.map(a => (
             <button key={a.id} onClick={() => onOpenArtist(a.id)} style={{
               display:'flex', flexDirection:'column', textAlign:'left',
               background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:10,
@@ -53,6 +89,7 @@ function ArtistsPage({ onOpenArtist, onNewArtist }) {
             </button>
           ))}
         </div>
+      )}
     </div>
   );
 }

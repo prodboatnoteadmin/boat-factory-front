@@ -8,6 +8,17 @@ const slugify = (s) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '') || 'item';
 
+// Unique, readable beat URL: title + artist + id. The id guarantees the
+// right beat opens even when title (and artist) are duplicated.
+const beatFullSlug = (b) => {
+  if (!b) return '';
+  const an = window.getArtistName ? (window.getArtistName(b.artist) || '') : '';
+  const segs = [slugify(b.title)];
+  if (an) segs.push(slugify(an));
+  segs.push(b.id);
+  return segs.join('-');
+};
+
 function App() {
   const { useNavigate, useLocation } = window.ReactRouterDOM;
   const navigate = useNavigate();
@@ -62,7 +73,9 @@ function App() {
     }
   } else if (parts[0] === 'beats' && parts[1]) {
     const slug = decodeURIComponent(parts[1]);
-    const b = window.DATA.BEATS.find(x => slugify(x.title) === slug || x.id === slug);
+    const b = window.DATA.BEATS.find(x => beatFullSlug(x) === slug)
+           || window.DATA.BEATS.find(x => x.id === slug)
+           || window.DATA.BEATS.find(x => slugify(x.title) === slug);
     route = { page: 'beat-detail', beatId: b ? b.id : null, artistId: null };
   } else {
     route = { page: 'beats', beatId: null, artistId: null };
@@ -97,7 +110,7 @@ function App() {
   // ---- Navigation helpers (write the URL) --------------------------
   const beatSlug = (id) => {
     const b = window.DATA.BEATS.find(x => x.id === id);
-    return b ? (slugify(b.title) || id) : id;
+    return b ? beatFullSlug(b) : id;
   };
   const artistSlug = (id) => {
     const a = window.DATA.ARTISTS.find(x => x.id === id);

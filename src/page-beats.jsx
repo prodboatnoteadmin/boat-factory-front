@@ -102,7 +102,7 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
           <SortHead label="BPM" col="bpm" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
           <SortHead label="Key" col="key" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
           <SortHead label="Årstal" col="year" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
-          <SortHead label="Q Position" col="queuePosition" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
+          <SortHead label="Position" col="queuePosition" sortBy={sortBy} sortDir={sortDir} setSort={setSort} align="right" />
           <SortHead label="Udgivet" col="udgivet" sortBy={sortBy} sortDir={sortDir} setSort={setSort} align="right" />
         </div>
         {filtered.length === 0 && (
@@ -152,7 +152,7 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
               <div className="mono" style={{fontSize:13, color:'var(--text-2)'}}>{b.bpm}</div>
               <div className="mono" style={{fontSize:13, color:'var(--text-2)'}}>{b.key}</div>
               <div className="mono" style={{fontSize:13, color:'var(--text-3)'}}>{b.year}</div>
-              <div className="mono" style={{fontSize:13, color:'var(--text-2)'}}>{b.queuePosition ?? ''}</div>
+              <div className="mono" style={{fontSize:13, color:'var(--text-2)', textAlign:'right'}}>{b.queuePosition ?? ''}</div>
               <div style={{fontSize:12, color: published ? 'var(--text-2)' : 'var(--text-4)', textAlign:'right'}}>
                 {published ? window.fmtDate(published) : '—'}
               </div>

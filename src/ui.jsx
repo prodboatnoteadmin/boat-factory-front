@@ -274,4 +274,25 @@ function ProgressBar({ height = 6, style }) {
   );
 }
 
-Object.assign(window, { Btn, StatusPill, CategoryPill, Chip, AddChip, Card, TextInput, Select, Toggle, PageHeader, ProgressBar, STATUS_COLORS, STATUS_LABEL, fmtNum, fmtDate, fmtRelative, getArtistName, uiStyles, DropdownMenu });
+// Hover tooltip (native title is unreliable here, esp. on disabled buttons).
+function Tip({ label, children, style }) {
+  const [show, setShow] = useState(false);
+  return (
+    <span
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+      style={{ position:'relative', display:'inline-flex', ...style }}>
+      {children}
+      {show && label && (
+        <span style={{
+          position:'absolute', right:'calc(100% + 6px)', top:'50%', transform:'translateY(-50%)',
+          background:'var(--bg-1)', border:'1px solid var(--border-strong)', color:'var(--text)',
+          fontSize:11, fontWeight:600, padding:'4px 8px', borderRadius:5, whiteSpace:'nowrap',
+          pointerEvents:'none', zIndex:80, boxShadow:'0 6px 20px rgba(0,0,0,.45)'
+        }}>{label}</span>
+      )}
+    </span>
+  );
+}
+
+Object.assign(window, { Btn, StatusPill, CategoryPill, Chip, AddChip, Card, TextInput, Select, Toggle, PageHeader, ProgressBar, Tip, STATUS_COLORS, STATUS_LABEL, fmtNum, fmtDate, fmtRelative, getArtistName, uiStyles, DropdownMenu });

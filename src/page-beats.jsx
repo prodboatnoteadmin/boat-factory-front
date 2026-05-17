@@ -86,17 +86,17 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue, collab, embedded }) {
         <div style={{flex:'1 1 300px', minWidth:240}}>
           <window.TextInput value={search} onChange={setSearch} placeholder="Søg efter sangnavn" icon={<I.search />} fullWidth />
         </div>
+        <window.Select value={statusFilter} onChange={setStatusFilter} options={[
+          { value:'', label:'Vis alle' },
+          { value:'notqueued', label:'Ikke i kø' },
+          { value:'queued', label:'I kø' },
+        ]} style={{width:160}} />
         {!embedded && (
           <window.Select value={artistFilter} onChange={setArtistFilter} options={[
             { value:'', label:'Alle artister' },
             ...window.DATA.ARTISTS.map(a => ({ value:a.id, label:a.name }))
           ]} style={{width:180}} />
         )}
-        <window.Select value={statusFilter} onChange={setStatusFilter} options={[
-          { value:'', label:'Vis alle' },
-          { value:'notqueued', label:'Ikke i kø' },
-          { value:'queued', label:'I kø' },
-        ]} style={{width:160}} />
       </div>
 
       {/* Table */}

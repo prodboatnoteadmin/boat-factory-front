@@ -105,12 +105,14 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
     setQueueIds(queueIds.filter(qId => qId !== id));
     setPendingIds([id, ...pendingIds.filter(pId => pId !== id)]);
   };
-  const moveToTop = (id) => {
-    setQueueIds([id, ...queueIds.filter(qId => qId !== id)]);
+  // Keep the user's scroll position when reordering.
+  const keepScroll = (fn) => {
+    const y = window.scrollY;
+    fn();
+    requestAnimationFrame(() => window.scrollTo(0, y));
   };
-  const moveToBottom = (id) => {
-    setQueueIds([...queueIds.filter(qId => qId !== id), id]);
-  };
+  const moveToTop = (id) => keepScroll(() => setQueueIds([id, ...queueIds.filter(qId => qId !== id)]));
+  const moveToBottom = (id) => keepScroll(() => setQueueIds([...queueIds.filter(qId => qId !== id), id]));
 
   return (
     <div>
@@ -200,43 +202,47 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
                 <div className="mono" style={{fontSize:13, color:'var(--text-3)'}}>{b.year}</div>
                 <div style={{fontSize:13, color:'var(--text-2)'}}>{b.category ? (b.category.charAt(0).toUpperCase() + b.category.slice(1)) : ''}</div>
                 <div onClick={(e) => e.stopPropagation()}>
-                  <button onClick={() => moveToTop(b.id)} disabled={pos === 0}
-                    title={pos === 0 ? 'Allerede #1' : 'Flyt til #1'} style={{
+                  <window.Tip label={pos === 0 ? 'Allerede #1' : 'Flyt til #1'}>
+                    <button onClick={() => moveToTop(b.id)} disabled={pos === 0} style={{
                       width:28, height:28, borderRadius:5,
                       color: pos === 0 ? 'var(--text-4)' : 'var(--text-2)',
                       border:'1px solid var(--border-strong)', background:'transparent',
                       display:'inline-flex', alignItems:'center', justifyContent:'center',
                       cursor: pos === 0 ? 'not-allowed' : 'pointer'
                     }}
-                    onMouseEnter={e=>{ if (pos!==0){ e.currentTarget.style.background='rgba(74,144,217,.12)'; e.currentTarget.style.color='#7ab2ea'; e.currentTarget.style.borderColor='rgba(74,144,217,.5)'; } }}
-                    onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; e.currentTarget.style.color=pos===0?'var(--text-4)':'var(--text-2)'; e.currentTarget.style.borderColor='var(--border-strong)'; }}>
-                    <I.chevUp width={15} height={15} />
-                  </button>
+                      onMouseEnter={e=>{ if (pos!==0){ e.currentTarget.style.background='rgba(74,144,217,.12)'; e.currentTarget.style.color='#7ab2ea'; e.currentTarget.style.borderColor='rgba(74,144,217,.5)'; } }}
+                      onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; e.currentTarget.style.color=pos===0?'var(--text-4)':'var(--text-2)'; e.currentTarget.style.borderColor='var(--border-strong)'; }}>
+                      <I.chevUp width={15} height={15} />
+                    </button>
+                  </window.Tip>
                 </div>
                 <div onClick={(e) => e.stopPropagation()}>
-                  <button onClick={() => moveToBottom(b.id)} disabled={pos === queueIds.length - 1}
-                    title={pos === queueIds.length - 1 ? 'Allerede nederst' : 'Flyt til bund'} style={{
+                  <window.Tip label={pos === queueIds.length - 1 ? 'Allerede nederst' : 'Flyt til bund'}>
+                    <button onClick={() => moveToBottom(b.id)} disabled={pos === queueIds.length - 1} style={{
                       width:28, height:28, borderRadius:5,
                       color: pos === queueIds.length - 1 ? 'var(--text-4)' : 'var(--text-2)',
                       border:'1px solid var(--border-strong)', background:'transparent',
                       display:'inline-flex', alignItems:'center', justifyContent:'center',
                       cursor: pos === queueIds.length - 1 ? 'not-allowed' : 'pointer'
                     }}
-                    onMouseEnter={e=>{ if (pos!==queueIds.length-1){ e.currentTarget.style.background='rgba(74,144,217,.12)'; e.currentTarget.style.color='#7ab2ea'; e.currentTarget.style.borderColor='rgba(74,144,217,.5)'; } }}
-                    onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; e.currentTarget.style.color=pos===queueIds.length-1?'var(--text-4)':'var(--text-2)'; e.currentTarget.style.borderColor='var(--border-strong)'; }}>
-                    <I.chevDown width={15} height={15} />
-                  </button>
+                      onMouseEnter={e=>{ if (pos!==queueIds.length-1){ e.currentTarget.style.background='rgba(74,144,217,.12)'; e.currentTarget.style.color='#7ab2ea'; e.currentTarget.style.borderColor='rgba(74,144,217,.5)'; } }}
+                      onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; e.currentTarget.style.color=pos===queueIds.length-1?'var(--text-4)':'var(--text-2)'; e.currentTarget.style.borderColor='var(--border-strong)'; }}>
+                      <I.chevDown width={15} height={15} />
+                    </button>
+                  </window.Tip>
                 </div>
                 <div onClick={(e) => e.stopPropagation()}>
-                  <button onClick={() => setConfirmRemove(b.id)} title="Fjern fra kø" style={{
-                    width:28, height:28, borderRadius:5, color:'var(--text-3)',
-                    border:'1px solid var(--border-strong)', background:'transparent',
-                    display:'inline-flex', alignItems:'center', justifyContent:'center'
-                  }}
-                    onMouseEnter={e=>{e.currentTarget.style.background='rgba(232,72,85,.12)';e.currentTarget.style.color='#ec6d77';e.currentTarget.style.borderColor='rgba(232,72,85,.5)'}}
-                    onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='var(--text-3)';e.currentTarget.style.borderColor='var(--border-strong)'}}>
-                    <I.x width={13} height={13} />
-                  </button>
+                  <window.Tip label="Fjern fra kø">
+                    <button onClick={() => setConfirmRemove(b.id)} style={{
+                      width:28, height:28, borderRadius:5, color:'var(--text-3)',
+                      border:'1px solid var(--border-strong)', background:'transparent',
+                      display:'inline-flex', alignItems:'center', justifyContent:'center'
+                    }}
+                      onMouseEnter={e=>{e.currentTarget.style.background='rgba(232,72,85,.12)';e.currentTarget.style.color='#ec6d77';e.currentTarget.style.borderColor='rgba(232,72,85,.5)'}}
+                      onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='var(--text-3)';e.currentTarget.style.borderColor='var(--border-strong)'}}>
+                      <I.x width={13} height={13} />
+                    </button>
+                  </window.Tip>
                 </div>
               </div>
             );

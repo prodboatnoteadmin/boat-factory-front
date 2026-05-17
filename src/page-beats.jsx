@@ -91,7 +91,7 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
         <div style={{ overflowX:'auto' }}>
         <div style={{
           display:'grid',
-          gridTemplateColumns:'40px minmax(220px, 2fr) minmax(140px, 1.2fr) 70px 80px 70px 120px',
+          gridTemplateColumns:'40px minmax(220px, 2fr) minmax(140px, 1.2fr) 70px 80px 70px 90px 120px',
           gap:16,
           alignItems:'center', padding:'14px 20px', borderBottom:'1px solid var(--border)', background:'var(--bg-1)',
           minWidth: 820
@@ -102,6 +102,7 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
           <SortHead label="BPM" col="bpm" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
           <SortHead label="Key" col="key" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
           <SortHead label="Årstal" col="year" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
+          <SortHead label="Q Position" col="queuePosition" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
           <SortHead label="Udgivet" col="udgivet" sortBy={sortBy} sortDir={sortDir} setSort={setSort} align="right" />
         </div>
         {filtered.length === 0 && (
@@ -115,7 +116,7 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
           return (
             <div key={b.id} onClick={() => onOpenBeat(b.id)} style={{
               display:'grid',
-              gridTemplateColumns:'40px minmax(220px, 2fr) minmax(140px, 1.2fr) 70px 80px 70px 120px',
+              gridTemplateColumns:'40px minmax(220px, 2fr) minmax(140px, 1.2fr) 70px 80px 70px 90px 120px',
               gap:16,
               alignItems:'center', padding:'14px 20px',
               borderTop: idx === 0 ? 'none' : '1px solid var(--border)',
@@ -151,6 +152,7 @@ function BeatsPage({ onOpenBeat, onNewBeat, onAddToQueue }) {
               <div className="mono" style={{fontSize:13, color:'var(--text-2)'}}>{b.bpm}</div>
               <div className="mono" style={{fontSize:13, color:'var(--text-2)'}}>{b.key}</div>
               <div className="mono" style={{fontSize:13, color:'var(--text-3)'}}>{b.year}</div>
+              <div className="mono" style={{fontSize:13, color:'var(--text-2)'}}>{b.queuePosition ?? ''}</div>
               <div style={{fontSize:12, color: published ? 'var(--text-2)' : 'var(--text-4)', textAlign:'right'}}>
                 {published ? window.fmtDate(published) : '—'}
               </div>

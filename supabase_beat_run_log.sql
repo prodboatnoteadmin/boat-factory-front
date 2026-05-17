@@ -15,7 +15,7 @@
 
 create table if not exists public.beat_run_log (
   id                uuid primary key default gen_random_uuid(),
-  beat_id           uuid references public.beats(id) on delete set null, -- relation to the beat
+  beat_id           uuid,          -- relation to public.beats(id) (see note below)
   date              date,          -- when the run (kørsel) happened
   youtube_title     text,
   artist            text,
@@ -44,3 +44,18 @@ create policy "beat_run_log read for authenticated"
 
 grant select on public.beat_run_log to authenticated;
 grant all    on public.beat_run_log to service_role;
+
+-- ----------------------------------------------------------------------------
+--  OPTIONAL: enforce the relation with a real foreign key.
+--  Left OUT by default on purpose: adding an FK that references the SHARED
+--  public.beats table briefly takes a lock on beats (to install the
+--  referential trigger), which can momentarily block writes to beats on the
+--  other production system. The app does not need the constraint — beat_id +
+--  the index above is a sufficient logical relation and the UI matches on it.
+--  Run this line ONLY during a quiet window if you want hard referential
+--  integrity:
+--
+--  alter table public.beat_run_log
+--    add constraint beat_run_log_beat_id_fkey
+--    foreign key (beat_id) references public.beats(id) on delete set null;
+-- ----------------------------------------------------------------------------

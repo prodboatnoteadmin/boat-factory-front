@@ -46,8 +46,8 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
 
   // Same column metrics as the Beats list (40/2fr/1.2fr/70/80/70) plus
   // a position col, a drag handle, and two action buttons.
-  const cols = '44px 28px minmax(220px, 2fr) minmax(140px, 1.2fr) 70px 80px 70px 76px 44px 48px';
-  const MIN_W = 860;
+  const cols = '44px 28px minmax(220px, 2fr) minmax(140px, 1.2fr) 70px 80px 70px 76px 44px 44px 48px';
+  const MIN_W = 904;
 
   const queueBeats = queueIds
     .map(id => window.DATA.BEATS.find(b => b.id === id))
@@ -108,6 +108,9 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
   const moveToTop = (id) => {
     setQueueIds([id, ...queueIds.filter(qId => qId !== id)]);
   };
+  const moveToBottom = (id) => {
+    setQueueIds([...queueIds.filter(qId => qId !== id), id]);
+  };
 
   return (
     <div>
@@ -140,6 +143,7 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
             <QSort label="Key" col="key" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
             <QSort label="Årstal" col="year" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
             <QSort label="Rating" col="category" sortBy={sortBy} sortDir={sortDir} setSort={setSort} />
+            <QHead></QHead>
             <QHead></QHead>
             <QHead></QHead>
           </div>
@@ -210,7 +214,21 @@ function PublishQueuePage({ onOpenBeat, queueIds, setQueueIds, pendingIds, setPe
                   </button>
                 </div>
                 <div onClick={(e) => e.stopPropagation()}>
-                  <button onClick={() => setConfirmRemove(b.id)} title="Fjern fra kø (→ Draft)" style={{
+                  <button onClick={() => moveToBottom(b.id)} disabled={pos === queueIds.length - 1}
+                    title={pos === queueIds.length - 1 ? 'Allerede nederst' : 'Flyt til bund'} style={{
+                      width:28, height:28, borderRadius:5,
+                      color: pos === queueIds.length - 1 ? 'var(--text-4)' : 'var(--text-2)',
+                      border:'1px solid var(--border-strong)', background:'transparent',
+                      display:'inline-flex', alignItems:'center', justifyContent:'center',
+                      cursor: pos === queueIds.length - 1 ? 'not-allowed' : 'pointer'
+                    }}
+                    onMouseEnter={e=>{ if (pos!==queueIds.length-1){ e.currentTarget.style.background='rgba(74,144,217,.12)'; e.currentTarget.style.color='#7ab2ea'; e.currentTarget.style.borderColor='rgba(74,144,217,.5)'; } }}
+                    onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; e.currentTarget.style.color=pos===queueIds.length-1?'var(--text-4)':'var(--text-2)'; e.currentTarget.style.borderColor='var(--border-strong)'; }}>
+                    <I.chevDown width={15} height={15} />
+                  </button>
+                </div>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <button onClick={() => setConfirmRemove(b.id)} title="Fjern fra kø" style={{
                     width:28, height:28, borderRadius:5, color:'var(--text-3)',
                     border:'1px solid var(--border-strong)', background:'transparent',
                     display:'inline-flex', alignItems:'center', justifyContent:'center'

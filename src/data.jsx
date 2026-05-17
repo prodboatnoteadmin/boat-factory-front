@@ -175,13 +175,23 @@ window.loadData = async function loadData() {
 
   window.getBeatJobs = () => []; // legacy, unused
 
-  // Runs (kørsler) for a beat: matched by beat_id, or by YouTube video id as
-  // a fallback when the writer only filled youtube_link. Newest first.
+  // Runs for a beat: matched on the YouTube link (video id) — that is the
+  // real key (multiple beat rows can share one upload). beat_id is only a
+  // fallback when the beat has no link. Deduped so an upload shows once.
   window.getBeatRuns = (beatId) => {
     const b = beatById(beatId);
     const bv = b ? ytVid(b.youtube) : null;
-    return RUNLOG
-      .filter((r) => (r.beatId && r.beatId === beatId) || (bv && ytVid(r.youtubeLink) === bv))
+    const matched = RUNLOG.filter((r) =>
+      bv ? ytVid(r.youtubeLink) === bv : (r.beatId && r.beatId === beatId)
+    );
+    const seen = new Set();
+    return matched
+      .filter((r) => {
+        const key = ytVid(r.youtubeLink) || r.id;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
       .sort((a, c) => String(c.date).localeCompare(String(a.date)));
   };
   // Surface the beat's own YouTube link so the embed/indicators work.

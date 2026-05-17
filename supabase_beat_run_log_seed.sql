@@ -38,6 +38,7 @@ select
   end
 from public.beats b
 left join public.artists a on a.id = b.artist_id
-where not exists (
-  select 1 from public.beat_run_log r where r.beat_id = b.id
-);
+where b.youtube_link is not null and b.youtube_link <> ''
+  and not exists (                       -- key is the YouTube link, not the beat
+    select 1 from public.beat_run_log r where r.youtube_link = b.youtube_link
+  );

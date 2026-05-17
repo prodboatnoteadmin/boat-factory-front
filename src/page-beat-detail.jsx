@@ -11,12 +11,27 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
   const [collab, setCollab] = React.useState(beat.collab || '');
   const [manualYt, setManualYt] = React.useState('');
   const [savedManualYt, setSavedManualYt] = React.useState(null);
+  const [topEdit, setTopEdit] = React.useState(false);
+  const [topUrl, setTopUrl] = React.useState('');
 
   const jobs = window.getBeatJobs(beat.id);
   const detectedYt = window.getFirstYouTubeLink(beat.id);
   const youtubeLink = savedManualYt || detectedYt;
   const queuePosition = queueIds.indexOf(beat.id);
   const inQueue = queuePosition !== -1;
+
+  const saveTopLink = async () => {
+    const v = topUrl.trim();
+    if (!v) return;
+    setSavedManualYt(v);
+    setTopEdit(false);
+    try {
+      await window.DB.updateBeatYouTube(beat.id, v);
+      if (window.__refreshData) await window.__refreshData();
+    } catch (e) {
+      alert('Kunne ikke gemme YouTube-link: ' + e.message);
+    }
+  };
 
   const logoBtn = (disabled) => ({
     display:'inline-flex', alignItems:'center', gap:8,
@@ -139,14 +154,40 @@ function BeatDetailPage({ beatId, onBack, onNav, onOpenArtist, onEdit, onDelete,
               return (
                 <div style={{
                   borderRadius:10, border:'1px solid var(--border)', background:'var(--bg-1)',
-                  padding:'22px 24px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:16
+                  padding:'22px 24px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:16, flexWrap:'wrap'
                 }}>
-                  <div style={{ fontSize:14, color:'var(--text-2)' }}>
-                    Linket kunne ikke indlejres som YouTube-video.
-                  </div>
-                  <a href={youtubeLink} target="_blank" rel="noopener noreferrer" style={{ fontSize:13, color:'var(--blue)', display:'inline-flex', alignItems:'center', gap:6, flexShrink:0 }}>
-                    Åbn link <I.ext width={12} height={12} />
-                  </a>
+                  {topEdit ? (
+                    <>
+                      <input
+                        value={topUrl}
+                        onChange={(e) => setTopUrl(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); saveTopLink(); } }}
+                        placeholder="https://youtube.com/watch?v=…"
+                        autoFocus
+                        style={{ flex:'1 1 280px', minWidth:200, background:'var(--bg-2)', border:'1px solid var(--border-strong)', borderRadius:6, outline:'none', color:'var(--text)', fontSize:14, padding:'9px 12px', fontFamily:'JetBrains Mono, monospace' }}
+                      />
+                      <div style={{ display:'flex', gap:8, flexShrink:0 }}>
+                        <window.Btn kind="secondary" size="sm" onClick={() => setTopEdit(false)}>Annuller</window.Btn>
+                        <window.Btn kind="blue" size="sm" icon={<I.check />} disabled={!topUrl.trim()} onClick={saveTopLink}>Gem</window.Btn>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontSize:14, color:'var(--text-2)' }}>
+                        Linket kunne ikke indlejres som YouTube-video.
+                      </div>
+                      <div style={{ display:'flex', gap:14, alignItems:'center', flexShrink:0 }}>
+                        <button onClick={() => { setTopUrl(youtubeLink); setTopEdit(true); }} style={{ fontSize:13, color:'var(--text-2)', display:'inline-flex', alignItems:'center', gap:6, background:'transparent', cursor:'pointer' }}
+                          onMouseEnter={e=>e.currentTarget.style.color='var(--text)'}
+                          onMouseLeave={e=>e.currentTarget.style.color='var(--text-2)'}>
+                          <I.edit width={13} height={13} /> Ændre link
+                        </button>
+                        <a href={youtubeLink} target="_blank" rel="noopener noreferrer" style={{ fontSize:13, color:'var(--blue)', display:'inline-flex', alignItems:'center', gap:6 }}>
+                          Åbn link <I.ext width={12} height={12} />
+                        </a>
+                      </div>
+                    </>
+                  )}
                 </div>
               );
             }

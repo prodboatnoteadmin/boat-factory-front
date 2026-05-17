@@ -3,8 +3,10 @@
 // so we expose them here.
 import React from 'react';
 import * as ReactDOMClient from 'react-dom/client';
+import * as ReactRouterDOM from 'react-router-dom';
 import { supabase } from './supabaseClient';
 
 window.React = React;
 window.ReactDOM = ReactDOMClient;
+window.ReactRouterDOM = ReactRouterDOM;
 window.supabase = supabase;

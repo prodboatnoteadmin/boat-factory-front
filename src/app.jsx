@@ -1,8 +1,18 @@
-// Main app — router + layout shell (Supabase-backed)
+// Main app — URL-driven router (React Router) + layout shell.
 const { useState: useStateApp, useEffect: useEffectApp, useRef: useRefApp } = React;
 
+const slugify = (s) =>
+  String(s || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'item';
+
 function App() {
-  const [route, setRoute] = useStateApp({ page: 'beats', beatId: null, artistId: null });
+  const { useNavigate, useLocation } = window.ReactRouterDOM;
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [modalOpen, setModalOpen] = useStateApp(false);
   const [modalBeatId, setModalBeatId] = useStateApp(null);
   const [artistModalOpen, setArtistModalOpen] = useStateApp(false);
@@ -28,10 +38,43 @@ function App() {
       .catch(e => alert('Kunne ikke gemme køen: ' + e.message));
   }, [queueIds, pendingIds]);
 
+  // ---- Route derived from the URL ----------------------------------
+  const parts = location.pathname.split('/').filter(Boolean);
+  let route;
+  if (parts[0] === 'queue') {
+    route = { page: 'queue', beatId: null, artistId: null };
+  } else if (parts[0] === 'artists') {
+    if (parts[1]) {
+      const slug = decodeURIComponent(parts[1]);
+      const a = window.DATA.ARTISTS.find(x => slugify(x.name) === slug || x.id === slug);
+      route = { page: 'artist-detail', beatId: null, artistId: a ? a.id : null };
+    } else {
+      route = { page: 'artists', beatId: null, artistId: null };
+    }
+  } else if (parts[0] === 'beats' && parts[1]) {
+    const slug = decodeURIComponent(parts[1]);
+    const b = window.DATA.BEATS.find(x => slugify(x.title) === slug || x.id === slug);
+    route = { page: 'beat-detail', beatId: b ? b.id : null, artistId: null };
+  } else {
+    route = { page: 'beats', beatId: null, artistId: null };
+  }
+
+  // Normalise "/" to "/beats" and bounce unresolved detail links.
+  useEffectApp(() => {
+    if (location.pathname === '/' || location.pathname === '') {
+      navigate('/beats', { replace: true });
+    } else if (route.page === 'beat-detail' && !route.beatId) {
+      navigate('/beats', { replace: true });
+    } else if (route.page === 'artist-detail' && !route.artistId) {
+      navigate('/artists', { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
   // Always start a newly opened view at the top.
   useEffectApp(() => {
     window.scrollTo(0, 0);
-  }, [route.page, route.beatId, route.artistId]);
+  }, [location.pathname]);
 
   // Toast for bulk add
   const [toast, setToast] = useStateApp(null);
@@ -40,17 +83,19 @@ function App() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // route helpers + a simple history stack powering the "Tilbage" button
-  const [history, setHistory] = useStateApp([]);
-  const go = (next) => { setHistory([...history, route]); setRoute(next); };
-  const goBack = () => {
-    if (history.length === 0) { setRoute({ page: 'beats', beatId: null, artistId: null }); return; }
-    setRoute(history[history.length - 1]);
-    setHistory(history.slice(0, -1));
+  // ---- Navigation helpers (write the URL) --------------------------
+  const beatSlug = (id) => {
+    const b = window.DATA.BEATS.find(x => x.id === id);
+    return b ? (slugify(b.title) || id) : id;
   };
-  const nav = (page) => go({ page, beatId: null, artistId: null });
-  const openBeat = (id) => go({ page: 'beat-detail', beatId: id, artistId: null });
-  const openArtist = (id) => go({ page: 'artist-detail', beatId: null, artistId: id });
+  const artistSlug = (id) => {
+    const a = window.DATA.ARTISTS.find(x => x.id === id);
+    return a ? (slugify(a.name) || id) : id;
+  };
+  const nav = (page) => navigate('/' + page);
+  const openBeat = (id) => navigate('/beats/' + beatSlug(id));
+  const openArtist = (id) => navigate('/artists/' + artistSlug(id));
+  const goBack = () => navigate(-1);
   const openNewBeat = () => { setModalBeatId(null); setModalOpen(true); };
   const openEditBeat = (id) => { setModalBeatId(id); setModalOpen(true); };
   const openNewArtist = () => { setArtistModalId(null); setArtistModalOpen(true); };
@@ -58,8 +103,7 @@ function App() {
 
   const refresh = () => (window.__refreshData ? window.__refreshData() : Promise.resolve());
 
-  // Reload data from Supabase whenever we land on a list view (e.g.
-  // coming back from a beat) so the list reflects the current DB.
+  // Reload data from Supabase whenever we land on a list view.
   const firstNavRef = useRefApp(true);
   useEffectApp(() => {
     if (firstNavRef.current) { firstNavRef.current = false; return; }
@@ -67,13 +111,11 @@ function App() {
       refresh();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [route.page]);
+  }, [location.pathname]);
 
   const handleBulkAddToQueue = (ids) => {
     const toAdd = ids.filter(id => !queueIds.includes(id));
-    // Add to TOP of queue
     setQueueIds([...toAdd, ...queueIds]);
-    // Remove from pending if present
     setPendingIds(pendingIds.filter(id => !toAdd.includes(id)));
     showToast(`${toAdd.length} ${toAdd.length === 1 ? 'beat tilføjet' : 'beats tilføjet'} øverst i køen`);
   };
@@ -146,7 +188,6 @@ function App() {
       pageEl = <div>404</div>;
   }
 
-  // Map detail pages back to their parent for sidebar highlighting
   const sidebarActive = ({
     'beat-detail': 'beats',
     'artist-detail': 'artists',

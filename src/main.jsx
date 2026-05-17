@@ -132,4 +132,9 @@ function Root() {
   return <window.App dataVersion={nonce} />;
 }
 
-createRoot(document.getElementById('root')).render(<Root />);
+const { BrowserRouter } = window.ReactRouterDOM;
+createRoot(document.getElementById('root')).render(
+  <BrowserRouter>
+    <Root />
+  </BrowserRouter>
+);

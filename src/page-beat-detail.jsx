@@ -814,7 +814,7 @@ The free version of this beat is NOT available for streaming services such as Sp
 
 All feedback is appreciated. Like the video if you enjoyed.
 
-#${artistNoSpace}typebeat #${artistNoSpace}beat #free${norm}typebeat #${artistNoSpace}typebeat${year} #typebeat
+♯${artistNoSpace}typebeat ♯${artistNoSpace}beat ♯free${norm}typebeat ♯${artistNoSpace}typebeat${year} ♯typebeat
 
 [FREE] ${artistName} Type Beat ${year} - '${songTitle}' | Prod. Boat Note${titleCollab}`;
 }

@@ -792,7 +792,7 @@ function buildYouTubeDescription(beat) {
   const collab = (beat.collab || '').trim();
   const year = beat.year || '';
   const bpm = beat.bpm || '';
-  const key = beat.key || '';
+  const key = (beat.key || '').replace(/#/g, '♯');   // music sharp in the description
   const beatstars = beat.beatstars || '';
   const songTitle = beat.title || '';
   const creditLine = collab ? `(Prod. Boat Note x ${collab})` : '(Prod. Boat Note)';

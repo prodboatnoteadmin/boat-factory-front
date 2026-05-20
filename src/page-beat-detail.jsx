@@ -784,11 +784,11 @@ function ytVideoId(url) {
 }
 
 // Build the YouTube description from the Boat Note template, filling
-// [ ] placeholders from the beat/artist. "[FREE]" stays literal.
+// placeholders from the beat/artist. "[FREE]" stays literal.
 function buildYouTubeDescription(beat) {
-  const artist = window.DATA.ARTISTS.find(a => a.id === beat.artist);
   const artistName = window.getArtistName(beat.artist) || '';
-  const norm = artistName.toLowerCase().replace(/[^a-z0-9]+/g, '');
+  const artistNoSpace = artistName.replace(/\s+/g, '');                 // keep case, no spaces
+  const norm = artistName.toLowerCase().replace(/[^a-z0-9]+/g, '');     // all lowercase, no spaces
   const collab = (beat.collab || '').trim();
   const year = beat.year || '';
   const bpm = beat.bpm || '';
@@ -798,13 +798,6 @@ function buildYouTubeDescription(beat) {
   const creditLine = collab ? `(Prod. Boat Note x ${collab})` : '(Prod. Boat Note)';
   const titleCollab = collab ? ` ${collab}` : '';
 
-  const tagBits = [];
-  if (artist) {
-    if (artist.youtubeKeywords) tagBits.push(artist.youtubeKeywords);
-    tagBits.push(...(artist.aTags || []), ...(artist.bTags || []), ...(artist.cTags || []));
-  }
-  const artisttag = tagBits.filter(Boolean).join(', ');
-
   return `💰 Purchase/Download: ${beatstars} | Buy 2 Get 1 Free
 ❗Add 3 beats to cart to activate discount
 Free for non profit use only. Must give credit ${creditLine}
@@ -812,21 +805,18 @@ Free for non profit use only. Must give credit ${creditLine}
 Bpm: ${bpm}
 Key: ${key}
 
-${'Instagram:'.padEnd(11)} https://www.instagram.com/prodboatnote/
-${'Email:'.padEnd(11)} prodboatnote@gmail.com
-${'Beat Store:'.padEnd(11)} https://boatnote.beatstars.com/
+📷Instagram: https://www.instagram.com/prodboatnote
+❗Email: prodboatnote@gmail.com
+BeatStars: https://boatnote.beatstars.com/
 
 This Beat is FREE for non-profit use ONLY. Any Use of my beats "Including leased beats" REQUIRE CREDIT IN THE TITLE (Prod. by Boat Note). There are NO Exceptions.
 The free version of this beat is NOT available for streaming services such as Spotify or Apple Music Etc.
 
 All feedback is appreciated. Like the video if you enjoyed.
 
-[FREE] ${artistName} Type Beat ${year} - '${songTitle}' | Prod. Boat Note${titleCollab}
+#${artistNoSpace}typebeat #${artistNoSpace}beat #free${norm}typebeat #${artistNoSpace}typebeat${year} #typebeat
 
-Ignore Tags
-${artisttag}
-
-#${norm}typebeat #${norm}typebeat${year} #${norm} #${norm}beats #free${norm}typebeat #free${norm}typebeats`;
+[FREE] ${artistName} Type Beat ${year} - '${songTitle}' | Prod. Boat Note${titleCollab}`;
 }
 
 window.ytVideoId = ytVideoId;

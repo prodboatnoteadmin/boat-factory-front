@@ -16,7 +16,7 @@
 //         description, notes, created_at, updated_at)
 //   (There is no `jobs` table — publishing history is therefore empty.)
 
-const KEYS = ['Cmin','C#min','Dmin','D#min','Emin','Fmin','F#min','Gmin','G#min','Amin','A#min','Bmin','Cmaj','C#maj','Dmaj','D#maj','Emaj','Fmaj','F#maj','Gmaj','G#maj','Amaj','A#maj','Bmaj'];
+const KEYS = ['Cmin','C♯min','Dmin','D♯min','Emin','Fmin','F♯min','Gmin','G♯min','Amin','A♯min','Bmin','Cmaj','C♯maj','Dmaj','D♯maj','Emaj','Fmaj','F♯maj','Gmaj','G♯maj','Amaj','A♯maj','Bmaj'];
 
 const sb = () => window.supabase;
 const arrify = (v) => (Array.isArray(v) ? v : v == null ? [] : [v]);
